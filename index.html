@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTeamHub - Team Management Software</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for productivity charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #50E3C2;
+            --background-color: #F8F9FA;
+            --surface-color: #FFFFFF;
+            --text-color: #333333;
+            --light-text-color: #666666;
+            --border-color: #E0E0E0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --red-alert: #F06292;
+            --green-success: #8BC34A;
+            --yellow-warning: #FFEB3B;
+            --blue-info: #2196F3;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        /* Utility Classes */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .gap-4 { gap: 1rem; }
+        .p-4 { padding: 1rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .shadow-md { box-shadow: 0 4px 6px -1px var(--shadow-light), 0 2px 4px -1px var(--shadow-light); }
+        .bg-white { background-color: var(--surface-color); }
+        .text-lg { font-size: 1.125rem; }
+        .font-semibold { font-weight: 600; }
+        .w-full { width: 100%; }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-gray-500 { color: var(--light-text-color); }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px var(--shadow-light);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3A7BD5;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .btn-secondary:hover {
+            background-color: #3AD5B4;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: var(--red-alert);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #D32F2F;
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--light-text-color);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: calc(100% - 20px); /* Adjust for padding */
+            padding: 0.75rem 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 250px;
+            background-color: var(--surface-color);
+            box-shadow: 2px 0 5px var(--shadow-light);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sidebar-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav li {
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--light-text-color);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+        }
+        .sidebar-nav a i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--light-text-color);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .page-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--text-color);
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--surface-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 6px 12px var(--shadow-medium);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text-color);
+        }
+
+        /* Specific Component Styles */
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .stats-card {
+            text-align: center;
+        }
+        .stats-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .stats-card .label {
+            font-size: 1rem;
+            color: var(--light-text-color);
+        }
+
+        /* Team Members */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .member-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background-color: var(--surface-color);
+            box-shadow: 0 4px 8px var(--shadow-light);
+        }
+        .member-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-color);
+        }
+        .member-card h4 {
+            margin: 0.5rem 0 0.25rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .member-card .role {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .member-card .email {
+            font-size: 0.9rem;
+            color: var(--light-text-color);
+            margin-bottom: 0.75rem;
+        }
+        .member-card .skillset {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .member-card .skill {
+            background-color: #E6EEF9;
+            color: #4A90E2;
+            padding: 0.3rem 0.7rem;
+            border-radius: 0.3rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .member-card .status-badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+        .status-active { background-color: var(--green-success); }
+        .status-on-leave { background-color: var(--yellow-warning); }
+        .status-idle { background-color: var(--red-alert); }
+        .member-card .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Kanban Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            align-items: start; /* Align columns to the top */
+        }
+        .kanban-column {
+            background-color: var(--background-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Inner shadow for depth */
+            min-height: 200px; /* Ensure columns have some height */
+        }
+        .kanban-column-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .kanban-column-header .task-count {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50%;
+            font-size: 0.8rem;
+        }
+        .task-card {
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 2px 5px var(--shadow-light);
+            margin-bottom: 0.75rem;
+            cursor: grab;
+            border: 1px solid var(--border-color);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .task-card:active {
+            cursor: grabbing;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px var(--shadow-medium);
+        }
+        .task-card h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .task-card p {
+            font-size: 0.85rem;
+            color: var(--light-text-color);
+            margin-bottom: 0.75rem;
+        }
+        .task-card .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--light-text-color);
+            margin-bottom: 0.75rem;
+        }
+        .task-card .priority-tag {
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+        }
+        .priority-high { background-color: var(--red-alert); }
+        .priority-medium { background-color: var(--yellow-warning); }
+        .priority-low { background-color: var(--green-success); }
+        .task-card .assigned-to {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .task-card .assigned-to img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .task-card .actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 0.75rem;
+        }
+
+        /* Calendar & Sprint View */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-light);
+        }
+        .calendar-nav button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-color);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+        .calendar-nav button:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-light);
+        }
+        .calendar-day-header {
+            font-weight: 600;
+            text-align: center;
+            padding: 0.75rem 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .calendar-day {
+            background-color: var(--background-color);
+            border-radius: 0.4rem;
+            min-height: 100px;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .calendar-day.current-month {
+            background-color: var(--surface-color);
+        }
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        .calendar-day .day-number {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .calendar-day .task-entry {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .calendar-day .task-entry:hover {
+            background-color: #3A7BD5;
+        }
+        .sprint-view {
+            margin-top: 2rem;
+        }
+        .sprint-week {
+            background-color: var(--surface-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+        .sprint-week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sprint-week-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .sprint-week-header .countdown {
+            font-weight: 600;
+            color: var(--red-alert);
+        }
+        .sprint-tasks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .sprint-task-card {
+            background-color: #E6EEF9;
+            color: #4A90E2;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            flex: 1 1 calc(33% - 0.75rem); /* 3 cards per row on larger screens */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        @media (max-width: 768px) {
+            .sprint-task-card {
+                flex: 1 1 calc(50% - 0.75rem); /* 2 cards per row on medium screens */
+            }
+        }
+        @media (max-width: 480px) {
+            .sprint-task-card {
+                flex: 1 1 100%; /* 1 card per row on small screens */
+            }
+        }
+
+        /* Chat Simulator */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px; /* Fixed height for chat window */
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background-color: var(--surface-color);
+        }
+        .chat-header {
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background-color: var(--background-color);
+        }
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .chat-message.self {
+            justify-content: flex-end;
+        }
+        .chat-message.other .message-bubble {
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow-light);
+        }
+        .chat-message.self .message-bubble {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+        }
+        .chat-message img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+        }
+        .message-info {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--light-text-color);
+            margin-bottom: 0.25rem;
+        }
+        .chat-message.self .message-info {
+            justify-content: flex-end;
+        }
+        .message-info .sender-name {
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        .chat-message.self .message-info .sender-name {
+            color: var(--primary-color); /* No specific change for self, but useful if different */
+        }
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 1.2rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            gap: 0.75rem;
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            font-size: 1rem;
+            background-color: var(--background-color);
+        }
+        .chat-input-area button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .chat-input-area button:hover {
+            background-color: #3A7BD5;
+        }
+
+        /* Document Sharing */
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .document-item {
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 2px 5px var(--shadow-light);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .document-item-info {
+            flex-grow: 1;
+        }
+        .document-item h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .document-item p {
+            font-size: 0.85rem;
+            color: var(--light-text-color);
+            margin-bottom: 0.5rem;
+        }
+        .document-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .document-item a:hover {
+            text-decoration: underline;
+        }
+        .document-item .category-tag {
+            background-color: #E6EEF9;
+            color: #4A90E2;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .document-item .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Project Goals */
+        .goal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .goal-item {
+            background-color: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+        .goal-item h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .goal-item p {
+            font-size: 0.9rem;
+            color: var(--light-text-color);
+            margin-bottom: 1rem;
+        }
+        .goal-progress-bar {
+            background-color: var(--background-color);
+            border-radius: 0.5rem;
+            height: 10px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .goal-progress-fill {
+            height: 100%;
+            background-color: var(--secondary-color);
+            border-radius: 0.5rem;
+            transition: width 0.5s ease-in-out;
+        }
+        .goal-progress-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        .goal-item .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--light-text-color);
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border-color);
+        }
+        .goal-item .actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        /* Daily Standup */
+        .standup-form-section {
+            background-color: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 1.5rem;
+        }
+        .standup-summary-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .standup-summary-item {
+            background-color: var(--surface-color);
+            padding: 1.2rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 2px 5px var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+        .standup-summary-item h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .standup-summary-item p {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        .standup-summary-item .date-info {
+            font-size: 0.8rem;
+            color: var(--light-text-color);
+            margin-top: 0.75rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+                padding: 1rem 0.75rem;
+            }
+            .sidebar-header h2 {
+                font-size: 1.3rem;
+            }
+            .sidebar-nav a {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            .sidebar-nav a i {
+                margin-right: 0.6rem;
+                font-size: 1rem;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .page-header h1 {
+                font-size: 1.6rem;
+            }
+            .card {
+                padding: 1.2rem;
+            }
+            .card-header h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: 0 2px 5px var(--shadow-light);
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .sidebar-header {
+                display: none; /* Hide logo/title on small screens */
+            }
+            .sidebar-nav {
+                display: flex;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+                -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+            }
+            .sidebar-nav ul {
+                display: flex;
+                gap: 0.5rem;
+                white-space: nowrap; /* Prevent wrapping */
+            }
+            .sidebar-nav li {
+                margin-bottom: 0;
+                flex-shrink: 0; /* Prevent items from shrinking */
+            }
+            .sidebar-nav a {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            .sidebar-nav a i {
+                display: none; /* Hide icons on very small screens for space */
+            }
+            .sidebar-footer {
+                display: none;
+            }
+            .main-content {
+                padding: 1rem 0.75rem;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            .page-header h1 {
+                font-size: 1.4rem;
+            }
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: calc(100% - 20px);
+            }
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            .kanban-board {
+                grid-template-columns: 1fr; /* Single column on small screens */
+            }
+            .team-grid {
+                grid-template-columns: 1fr; /* Single column on small screens */
+            }
+            .chat-container {
+                height: 450px;
+            }
+            .chat-message img {
+                width: 30px;
+                height: 30px;
+            }
+            .message-bubble {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            .chat-input-area input {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            .chat-input-area button {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Role-based UI styles */
+        .role-admin .admin-only,
+        .role-developer .developer-only,
+        .role-designer .designer-only {
+            display: block; /* Or flex, grid, etc., depending on original display */
+        }
+        .role-admin .dev-des-only,
+        .role-developer .admin-des-only,
+        .role-designer .admin-dev-only {
+            display: none !important;
+        }
+        /* Default hide for role-specific elements */
+        .admin-only, .developer-only, .designer-only, .dev-des-only, .admin-des-only, .admin-dev-only {
+            display: none;
+        }
+
+        /* Message Box (for alerts/confirms) */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .message-box {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .message-box h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            color: var(--text-color);
+        }
+        .message-box p {
+            margin-bottom: 1.5rem;
+            color: var(--light-text-color);
+        }
+        .message-box-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Message Box Container -->
+    <div id="messageBoxContainer" class="hidden"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>DevTeamHub</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-target="dashboard-section"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="#team" class="nav-link" data-target="team-section"><i class="fas fa-users"></i> Team Members</a></li>
+                <li><a href="#tasks" class="nav-link" data-target="tasks-section"><i class="fas fa-tasks"></i> Tasks & Kanban</a></li>
+                <li><a href="#calendar" class="nav-link" data-target="calendar-section"><i class="fas fa-calendar-alt"></i> Calendar & Sprints</a></li>
+                <li><a href="#standup" class="nav-link" data-target="standup-section"><i class="fas fa-microphone-alt"></i> Daily Standup</a></li>
+                <li><a href="#chat" class="nav-link" data-target="chat-section"><i class="fas fa-comments"></i> Chat Simulator</a></li>
+                <li><a href="#documents" class="nav-link" data-target="documents-section"><i class="fas fa-folder-open"></i> Documents</a></li>
+                <li><a href="#goals" class="nav-link" data-target="goals-section"><i class="fas fa-bullseye"></i> Project Goals</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="form-group">
+                <label for="roleSelector">Current Role:</label>
+                <select id="roleSelector" class="w-full">
+                    <option value="admin">Admin</option>
+                    <option value="developer">Developer</option>
+                    <option value="designer">Designer</option>
+                </select>
+            </div>
+            <p>&copy; 2025 DevTeamHub</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="page-section">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <span id="offlineStatus" class="status-badge status-idle hidden">Offline Mode</span>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card stats-card">
+                    <h3>Total Members</h3>
+                    <div class="value" id="totalMembers">0</div>
+                </div>
+                <div class="card stats-card">
+                    <h3>Tasks In Progress</h3>
+                    <div class="value" id="tasksInProgress">0</div>
+                </div>
+                <div class="card stats-card">
+                    <h3>Tasks Done (This Week)</h3>
+                    <div class="value" id="tasksDoneWeek">0</div>
+                </div>
+                <div class="card stats-card">
+                    <h3>Active Sprints</h3>
+                    <div class="value" id="activeSprints">0</div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Task Completion Trend</h3>
+                </div>
+                <canvas id="taskCompletionChart"></canvas>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Member Productivity</h3>
+                </div>
+                <canvas id="memberProductivityChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Team Members Section -->
+        <section id="team-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Team Members</h1>
+                <button class="btn btn-primary admin-only" id="addMemberBtn"><i class="fas fa-user-plus mr-2"></i> Add Member</button>
+            </div>
+            <div class="team-grid" id="teamMembersGrid">
+                <!-- Team member cards will be rendered here -->
+            </div>
+
+            <!-- Add/Edit Member Modal -->
+            <div id="memberModal" class="modal hidden">
+                <div class="modal-content">
+                    <button class="modal-close-btn" id="closeMemberModal">&times;</button>
+                    <h3><span id="memberModalTitle">Add New Member</span></h3>
+                    <form id="memberForm">
+                        <input type="hidden" id="memberId">
+                        <div class="form-group">
+                            <label for="memberName">Name</label>
+                            <input type="text" id="memberName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberRole">Role</label>
+                            <select id="memberRole" required>
+                                <option value="">Select Role</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Developer">Developer</option>
+                                <option value="Designer">Designer</option>
+                                <option value="QA">QA Engineer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberAvatar">Avatar URL (Optional)</label>
+                            <input type="text" id="memberAvatar" placeholder="e.g., https://placehold.co/100x100">
+                        </div>
+                        <div class="form-group">
+                            <label for="memberEmail">Email</label>
+                            <input type="email" id="memberEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberSkillset">Skillset (comma-separated)</label>
+                            <input type="text" id="memberSkillset" placeholder="e.g., JavaScript, React, CSS">
+                        </div>
+                        <div class="form-group">
+                            <label for="memberGroup">Team Group</label>
+                            <select id="memberGroup" required>
+                                <option value="">Select Group</option>
+                                <option value="Frontend">Frontend</option>
+                                <option value="Backend">Backend</option>
+                                <option value="Design">Design</option>
+                                <option value="QA">QA</option>
+                            </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="memberStatus">Status</label>
+                            <select id="memberStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="On Leave">On Leave</option>
+                                <option value="Idle">Idle</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" id="cancelMemberForm">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Member</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks & Kanban Section -->
+        <section id="tasks-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Tasks & Kanban Board</h1>
+                <button class="btn btn-primary admin-only dev-des-only" id="addTaskBtn"><i class="fas fa-plus mr-2"></i> Add Task</button>
+            </div>
+            <div class="kanban-board" id="kanbanBoard">
+                <div class="kanban-column" data-status="To-do">
+                    <div class="kanban-column-header">To-do <span class="task-count" id="todoCount">0</span></div>
+                    <div class="task-list" id="todoTasks"></div>
+                </div>
+                <div class="kanban-column" data-status="In Progress">
+                    <div class="kanban-column-header">In Progress <span class="task-count" id="inProgressCount">0</span></div>
+                    <div class="task-list" id="inProgressTasks"></div>
+                </div>
+                <div class="kanban-column" data-status="Review">
+                    <div class="kanban-column-header">Review <span class="task-count" id="reviewCount">0</span></div>
+                    <div class="task-list" id="reviewTasks"></div>
+                </div>
+                <div class="kanban-column" data-status="Done">
+                    <div class="kanban-column-header">Done <span class="task-count" id="doneCount">0</span></div>
+                    <div class="task-list" id="doneTasks"></div>
+                </div>
+            </div>
+
+            <!-- Add/Edit Task Modal -->
+            <div id="taskModal" class="modal hidden">
+                <div class="modal-content">
+                    <button class="modal-close-btn" id="closeTaskModal">&times;</button>
+                    <h3><span id="taskModalTitle">Add New Task</span></h3>
+                    <form id="taskForm">
+                        <input type="hidden" id="taskId">
+                        <div class="form-group">
+                            <label for="taskTitle">Title</label>
+                            <input type="text" id="taskTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDescription">Description</label>
+                            <textarea id="taskDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskAssignedTo">Assigned To</label>
+                            <select id="taskAssignedTo" required>
+                                <option value="">Select Member</option>
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskPriority">Priority</label>
+                            <select id="taskPriority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskStatus">Status</label>
+                            <select id="taskStatus" required>
+                                <option value="To-do">To-do</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Review">Review</option>
+                                <option value="Done">Done</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskStartDate">Start Date</label>
+                            <input type="date" id="taskStartDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskEndDate">End Date</label>
+                            <input type="date" id="taskEndDate" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" id="cancelTaskForm">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendar & Sprint View Section -->
+        <section id="calendar-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Calendar & Sprints</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Monthly Calendar</h3>
+                </div>
+                <div class="calendar-nav">
+                    <button id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button>
+                    <h4 id="currentMonthYear"></h4>
+                    <button id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                    <!-- Calendar days will be rendered here -->
+                </div>
+            </div>
+
+            <div class="card sprint-view mt-4">
+                <div class="card-header">
+                    <h3>Sprint Planning</h3>
+                </div>
+                <div id="sprintWeeksContainer">
+                    <!-- Sprint weeks will be rendered here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Standup Section -->
+        <section id="standup-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Daily Standup Summary</h1>
+            </div>
+
+            <div class="standup-form-section card">
+                <div class="card-header">
+                    <h3>Submit Your Daily Standup</h3>
+                </div>
+                <form id="standupForm">
+                    <input type="hidden" id="standupId">
+                    <div class="form-group">
+                        <label for="standupMember">Your Name</label>
+                        <select id="standupMember" required>
+                            <option value="">Select Yourself</option>
+                            <!-- Options populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="standupYesterday">Yesterday I did...</label>
+                        <textarea id="standupYesterday" rows="3" placeholder="What did you accomplish yesterday?" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="standupToday">Today I will...</label>
+                        <textarea id="standupToday" rows="3" placeholder="What will you work on today?" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="standupBlockers">Blockers (if any)</label>
+                        <textarea id="standupBlockers" rows="2" placeholder="Any obstacles or challenges?"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Standup</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Past Standup Summaries</h3>
+                </div>
+                <div class="standup-summary-list" id="standupSummariesList">
+                    <!-- Standup summaries will be rendered here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Simulator Section -->
+        <section id="chat-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Internal Chat Simulator</h1>
+            </div>
+
+            <div class="chat-container card">
+                <div class="chat-header">
+                    Team Chat
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Chat messages will be rendered here -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Type your message..." autocomplete="off">
+                    <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Select Current Chat User</h3>
+                </div>
+                <div class="form-group">
+                    <select id="currentChatUserSelector" class="w-full">
+                        <option value="">Select User to Chat As</option>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Document Sharing Section -->
+        <section id="documents-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Document Sharing</h1>
+                <button class="btn btn-primary admin-only" id="addDocumentBtn"><i class="fas fa-file-alt mr-2"></i> Add Document</button>
+            </div>
+            <div class="document-list" id="documentList">
+                <!-- Documents will be rendered here -->
+            </div>
+
+            <!-- Add/Edit Document Modal -->
+            <div id="documentModal" class="modal hidden">
+                <div class="modal-content">
+                    <button class="modal-close-btn" id="closeDocumentModal">&times;</button>
+                    <h3><span id="documentModalTitle">Add New Document</span></h3>
+                    <form id="documentForm">
+                        <input type="hidden" id="documentId">
+                        <div class="form-group">
+                            <label for="documentTitle">Title</label>
+                            <input type="text" id="documentTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentUrl">Link (URL)</label>
+                            <input type="url" id="documentUrl" placeholder="e.g., https://example.com/doc.pdf" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentDescription">Description</label>
+                            <textarea id="documentDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentCategory">Category</label>
+                            <select id="documentCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Design Docs">Design Docs</option>
+                                <option value="Specs">Specs</option>
+                                <option value="APIs">APIs</option>
+                                <option value="Meeting Notes">Meeting Notes</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" id="cancelDocumentForm">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Document</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Goals Section -->
+        <section id="goals-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Project Goals</h1>
+                <button class="btn btn-primary admin-only" id="addGoalBtn"><i class="fas fa-bullseye mr-2"></i> Set New Goal</button>
+            </div>
+            <div class="goal-list" id="goalList">
+                <!-- Goals will be rendered here -->
+            </div>
+
+            <!-- Add/Edit Goal Modal -->
+            <div id="goalModal" class="modal hidden">
+                <div class="modal-content">
+                    <button class="modal-close-btn" id="closeGoalModal">&times;</button>
+                    <h3><span id="goalModalTitle">Set New Goal</span></h3>
+                    <form id="goalForm">
+                        <input type="hidden" id="goalId">
+                        <div class="form-group">
+                            <label for="goalTitle">Goal Title</label>
+                            <input type="text" id="goalTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="goalDescription">Description</label>
+                            <textarea id="goalDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="goalTargetDate">Target Date</label>
+                            <input type="date" id="goalTargetDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="goalLinkedTasks">Link Tasks (select multiple)</label>
+                            <select id="goalLinkedTasks" multiple size="5">
+                                <!-- Options populated by JS -->
+                            </select>
+                            <small class="text-gray-500">Hold Ctrl/Cmd to select multiple tasks.</small>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" id="cancelGoalForm">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Goal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Utility Functions
+        const STORAGE_KEY = 'devTeamHubData';
+
+        /**
+         * Generates a unique ID.
+         * @returns {string} A unique ID.
+         */
+        function generateUniqueId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        /**
+         * Loads data from localStorage.
+         * @returns {object} The parsed data or initial structure if not found.
+         */
+        function loadData() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : {
+                    members: [],
+                    tasks: [],
+                    standups: [],
+                    messages: [],
+                    documents: [],
+                    goals: [],
+                    currentUserRole: 'admin', // Default role
+                    currentChatUserId: null,
+                };
+            } catch (e) {
+                console.error("Error loading data from localStorage:", e);
+                // Return default structure on error to prevent app crash
+                return {
+                    members: [],
+                    tasks: [],
+                    standups: [],
+                    messages: [],
+                    documents: [],
+                    goals: [],
+                    currentUserRole: 'admin',
+                    currentChatUserId: null,
+                };
+            }
+        }
+
+        /**
+         * Saves data to localStorage.
+         * @param {object} data The data object to save.
+         */
+        function saveData(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error("Error saving data to localStorage:", e);
+            }
+        }
+
+        // Global State
+        let appData = loadData();
+        let currentView = 'dashboard-section';
+        let currentUserRole = appData.currentUserRole;
+        let currentChatUserId = appData.currentChatUserId;
+
+        // DOM Elements
+        const mainContent = document.getElementById('mainContent');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const roleSelector = document.getElementById('roleSelector');
+        const messageBoxContainer = document.getElementById('messageBoxContainer');
+        const offlineStatusBadge = document.getElementById('offlineStatus');
+
+        // --- Message Box Implementation (for custom alerts/confirms) ---
+        /**
+         * Displays a custom message box.
+         * @param {string} title - The title of the message box.
+         * @param {string} message - The message content.
+         * @param {Array<Object>} buttons - Array of button objects { text: string, className: string, callback: function }.
+         */
+        function showMessageBox(title, message, buttons) {
+            messageBoxContainer.innerHTML = `
+                <div class="message-box-overlay">
+                    <div class="message-box">
+                        <h3>${title}</h3>
+                        <p>${message}</p>
+                        <div class="message-box-actions">
+                            ${buttons.map(btn => `<button class="btn ${btn.className}" data-action="${btn.text}">${btn.text}</button>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            messageBoxContainer.classList.remove('hidden');
+
+            messageBoxContainer.querySelectorAll('.message-box-actions button').forEach(button => {
+                button.onclick = () => {
+                    const action = button.dataset.action;
+                    const btnConfig = buttons.find(b => b.text === action);
+                    if (btnConfig && btnConfig.callback) {
+                        btnConfig.callback();
+                    }
+                    messageBoxContainer.classList.add('hidden');
+                    messageBoxContainer.innerHTML = ''; // Clear content
+                };
+            });
+        }
+
+        // --- Role-Based UI Logic ---
+        /**
+         * Updates the UI based on the current user role.
+         */
+        function updateRoleBasedUI() {
+            document.body.classList.remove('role-admin', 'role-developer', 'role-designer');
+            document.body.classList.add(`role-${currentUserRole}`);
+
+            // Update role selector
+            roleSelector.value = currentUserRole;
+
+            // Re-render current section to apply new role visibility
+            showSection(currentView);
+        }
+
+        /**
+         * Handles role selector change.
+         */
+        roleSelector.addEventListener('change', (e) => {
+            currentUserRole = e.target.value;
+            appData.currentUserRole = currentUserRole;
+            saveData(appData);
+            updateRoleBasedUI();
+        });
+
+        // --- Navigation Logic ---
+        /**
+         * Shows the selected section and hides others.
+         * @param {string} sectionId - The ID of the section to show.
+         */
+        function showSection(sectionId) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            currentView = sectionId;
+
+            navLinks.forEach(link => {
+                if (link.dataset.target === sectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Trigger specific rendering functions for the shown section
+            if (sectionId === 'dashboard-section') {
+                renderDashboard();
+            } else if (sectionId === 'team-section') {
+                renderTeamMembers();
+            } else if (sectionId === 'tasks-section') {
+                renderKanbanBoard();
+                populateTaskAssignedToDropdown(); // Ensure dropdown is fresh
+            } else if (sectionId === 'calendar-section') {
+                renderCalendar();
+                renderSprintView();
+            } else if (sectionId === 'standup-section') {
+                renderStandupSummaries();
+                populateStandupMemberDropdown();
+            } else if (sectionId === 'chat-section') {
+                renderChatMessages();
+                populateChatUserSelector();
+            } else if (sectionId === 'documents-section') {
+                renderDocuments();
+            } else if (sectionId === 'goals-section') {
+                renderGoals();
+                populateGoalLinkedTasksDropdown();
+            }
+
+            // Apply role-based visibility after rendering section content
+            applyRoleVisibility(document.getElementById(sectionId));
+        }
+
+        /**
+         * Applies role-based visibility to elements within a given container.
+         * @param {HTMLElement} container - The container element.
+         */
+        function applyRoleVisibility(container) {
+            container.querySelectorAll('.admin-only, .developer-only, .designer-only, .dev-des-only, .admin-des-only, .admin-dev-only').forEach(el => {
+                el.classList.add('hidden'); // Hide all by default
+            });
+
+            if (currentUserRole === 'admin') {
+                container.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            } else if (currentUserRole === 'developer') {
+                container.querySelectorAll('.developer-only, .dev-des-only').forEach(el => el.classList.remove('hidden'));
+            } else if (currentUserRole === 'designer') {
+                container.querySelectorAll('.designer-only, .dev-des-only').forEach(el => el.classList.remove('hidden'));
+            }
+            // For combined roles, ensure they are shown if any of their roles are active
+            if (currentUserRole === 'admin' || currentUserRole === 'developer') {
+                container.querySelectorAll('.admin-dev-only').forEach(el => el.classList.remove('hidden'));
+            }
+            if (currentUserRole === 'admin' || currentUserRole === 'designer') {
+                container.querySelectorAll('.admin-des-only').forEach(el => el.classList.remove('hidden'));
+            }
+        }
+
+
+        // Event listeners for navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = e.target.closest('a').dataset.target;
+                showSection(targetId);
+                // Update URL hash for direct linking/refresh
+                window.location.hash = targetId.replace('-section', '');
+            });
+        });
+
+        // Handle initial load based on URL hash
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1);
+            const initialSection = hash ? `${hash}-section` : 'dashboard-section';
+            if (document.getElementById(initialSection)) {
+                showSection(initialSection);
+            } else {
+                showSection('dashboard-section'); // Fallback to dashboard
+            }
+            updateRoleBasedUI(); // Apply role visibility on initial load
+            checkOnlineStatus(); // Check online status on load
+            setInterval(checkOnlineStatus, 5000); // Check every 5 seconds
+        });
+
+        // --- Offline Mode Simulation ---
+        function checkOnlineStatus() {
+            if (navigator.onLine) {
+                offlineStatusBadge.classList.add('hidden');
+            } else {
+                offlineStatusBadge.classList.remove('hidden');
+            }
+        }
+        window.addEventListener('online', checkOnlineStatus);
+        window.addEventListener('offline', checkOnlineStatus);
+
+
+        // --- Dashboard Section Logic ---
+        const totalMembersEl = document.getElementById('totalMembers');
+        const tasksInProgressEl = document.getElementById('tasksInProgress');
+        const tasksDoneWeekEl = document.getElementById('tasksDoneWeek');
+        const activeSprintsEl = document.getElementById('activeSprints');
+        const taskCompletionChartCanvas = document.getElementById('taskCompletionChart');
+        const memberProductivityChartCanvas = document.getElementById('memberProductivityChart');
+
+        let taskCompletionChartInstance = null;
+        let memberProductivityChartInstance = null;
+
+        function renderDashboard() {
+            totalMembersEl.textContent = appData.members.length;
+            tasksInProgressEl.textContent = appData.tasks.filter(task => task.status === 'In Progress').length;
+
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            tasksDoneWeekEl.textContent = appData.tasks.filter(task =>
+                task.status === 'Done' && new Date(task.endDate) >= oneWeekAgo
+            ).length;
+
+            // Simple sprint count: tasks with end dates in the future, grouped by week
+            const futureTasks = appData.tasks.filter(task => new Date(task.endDate) >= new Date());
+            const sprintWeeks = new Set();
+            futureTasks.forEach(task => {
+                const endDate = new Date(task.endDate);
+                const startOfWeek = new Date(endDate);
+                startOfWeek.setDate(endDate.getDate() - endDate.getDay()); // Sunday of the week
+                sprintWeeks.add(startOfWeek.toISOString().split('T')[0]);
+            });
+            activeSprintsEl.textContent = sprintWeeks.size;
+
+
+            // Task Completion Trend Chart
+            const taskCompletionData = {}; // { 'YYYY-MM-DD': count }
+            appData.tasks.forEach(task => {
+                if (task.status === 'Done') {
+                    const date = new Date(task.endDate).toISOString().split('T')[0];
+                    taskCompletionData[date] = (taskCompletionData[date] || 0) + 1;
+                }
+            });
+
+            const sortedDates = Object.keys(taskCompletionData).sort();
+            const completionLabels = sortedDates.slice(-7); // Last 7 days
+            const completionCounts = completionLabels.map(date => taskCompletionData[date] || 0);
+
+            if (taskCompletionChartInstance) {
+                taskCompletionChartInstance.destroy();
+            }
+            taskCompletionChartInstance = new Chart(taskCompletionChartCanvas, {
+                type: 'line',
+                data: {
+                    labels: completionLabels,
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: completionCounts,
+                        borderColor: varColor('--primary-color'),
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: varColor('--primary-color'),
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: varColor('--primary-color'),
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true, /* Changed to true for fixed ratio */
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tasks Completed (Last 7 Days)',
+                            font: {
+                                size: 16,
+                                family: 'Inter'
+                            },
+                            color: varColor('--text-color')
+                        }
+                    }
+                }
+            });
+
+            // Member Productivity Chart
+            const memberProductivity = {}; // { memberId: count }
+            appData.tasks.forEach(task => {
+                if (task.status === 'Done' && task.assignedTo) {
+                    memberProductivity[task.assignedTo] = (memberProductivity[task.assignedTo] || 0) + 1;
+                }
+            });
+
+            const memberNames = appData.members.map(m => m.name);
+            const productivityCounts = appData.members.map(m => memberProductivity[m.id] || 0);
+
+            if (memberProductivityChartInstance) {
+                memberProductivityChartInstance.destroy();
+            }
+            memberProductivityChartInstance = new Chart(memberProductivityChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: memberNames,
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: productivityCounts,
+                        backgroundColor: varColor('--secondary-color'),
+                        borderColor: varColor('--secondary-color'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true, /* Changed to true for fixed ratio */
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tasks Completed by Member',
+                            font: {
+                                size: 16,
+                                family: 'Inter'
+                            },
+                            color: varColor('--text-color')
+                        }
+                    }
+                }
+            });
+        }
+
+        /** Helper to get CSS variable color */
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        // --- Team Member Management Logic ---
+        const teamMembersGrid = document.getElementById('teamMembersGrid');
+        const memberModal = document.getElementById('memberModal');
+        const memberModalTitle = document.getElementById('memberModalTitle');
+        const memberForm = document.getElementById('memberForm');
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        const closeMemberModalBtn = document.getElementById('closeMemberModal');
+        const cancelMemberFormBtn = document.getElementById('cancelMemberForm');
+
+        addMemberBtn.addEventListener('click', () => openMemberModal());
+        closeMemberModalBtn.addEventListener('click', () => memberModal.classList.add('hidden'));
+        cancelMemberFormBtn.addEventListener('click', () => memberModal.classList.add('hidden'));
+        memberForm.addEventListener('submit', handleMemberFormSubmit);
+
+        /**
+         * Renders the list of team members.
+         */
+        function renderTeamMembers() {
+            teamMembersGrid.innerHTML = '';
+            if (appData.members.length === 0) {
+                teamMembersGrid.innerHTML = '<p class="text-center text-gray-500 w-full">No team members added yet. Click "Add Member" to get started!</p>';
+                return;
+            }
+            appData.members.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.classList.add('member-card');
+                memberCard.innerHTML = `
+                    <img src="${member.avatar || 'https://placehold.co/80x80/E0E0E0/666666?text=User'}" alt="${member.name}">
+                    <h4>${member.name}</h4>
+                    <div class="role">${member.role}</div>
+                    <div class="email">${member.email}</div>
+                    <div class="skillset">
+                        ${member.skillset.map(skill => `<span class="skill">${skill}</span>`).join('')}
+                    </div>
+                    <span class="status-badge status-${member.status.toLowerCase().replace(' ', '-')}">${member.status}</span>
+                    <div class="actions admin-only">
+                        <button class="btn btn-outline btn-sm" onclick="openMemberModal('${member.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMember('${member.id}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                `;
+                teamMembersGrid.appendChild(memberCard);
+            });
+            applyRoleVisibility(teamMembersGrid); // Apply role visibility after rendering
+        }
+
+        /**
+         * Opens the member modal for adding or editing.
+         * @param {string} [memberId] - The ID of the member to edit (optional).
+         */
+        function openMemberModal(memberId) {
+            memberForm.reset();
+            document.getElementById('memberId').value = '';
+            memberModalTitle.textContent = 'Add New Member';
+
+            if (memberId) {
+                const member = appData.members.find(m => m.id === memberId);
+                if (member) {
+                    memberModalTitle.textContent = 'Edit Member';
+                    document.getElementById('memberId').value = member.id;
+                    document.getElementById('memberName').value = member.name;
+                    document.getElementById('memberRole').value = member.role;
+                    document.getElementById('memberAvatar').value = member.avatar || '';
+                    document.getElementById('memberEmail').value = member.email;
+                    document.getElementById('memberSkillset').value = member.skillset.join(', ');
+                    document.getElementById('memberGroup').value = member.group;
+                    document.getElementById('memberStatus').value = member.status;
+                }
+            }
+            memberModal.classList.remove('hidden');
+        }
+
+        /**
+         * Handles the submission of the member form.
+         * @param {Event} event - The form submit event.
+         */
+        function handleMemberFormSubmit(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('memberId').value || generateUniqueId();
+            const name = document.getElementById('memberName').value;
+            const role = document.getElementById('memberRole').value;
+            const avatar = document.getElementById('memberAvatar').value;
+            const email = document.getElementById('memberEmail').value;
+            const skillset = document.getElementById('memberSkillset').value.split(',').map(s => s.trim()).filter(s => s);
+            const group = document.getElementById('memberGroup').value;
+            const status = document.getElementById('memberStatus').value;
+
+            const newMember = { id, name, role, avatar, email, skillset, group, status };
+
+            const existingIndex = appData.members.findIndex(m => m.id === id);
+            if (existingIndex > -1) {
+                appData.members[existingIndex] = newMember;
+            } else {
+                appData.members.push(newMember);
+            }
+
+            saveData(appData);
+            memberModal.classList.add('hidden');
+            renderTeamMembers();
+            renderDashboard(); // Update dashboard stats
+            populateTaskAssignedToDropdown(); // Update task dropdown
+            populateStandupMemberDropdown(); // Update standup dropdown
+            populateChatUserSelector(); // Update chat user selector
+        }
+
+        /**
+         * Deletes a team member.
+         * @param {string} memberId - The ID of the member to delete.
+         */
+        function deleteMember(memberId) {
+            showMessageBox(
+                'Confirm Deletion',
+                'Are you sure you want to delete this member? All their assigned tasks will also be unassigned.',
+                [
+                    { text: 'Cancel', className: 'btn-outline', callback: () => {} },
+                    { text: 'Delete', className: 'btn-danger', callback: () => {
+                        appData.members = appData.members.filter(m => m.id !== memberId);
+                        // Also unassign tasks from this member
+                        appData.tasks = appData.tasks.map(task => {
+                            if (task.assignedTo === memberId) {
+                                task.assignedTo = null; // Or assign to a "Unassigned" default member
+                            }
+                            return task;
+                        });
+                        saveData(appData);
+                        renderTeamMembers();
+                        renderKanbanBoard(); // Re-render tasks to reflect unassignment
+                        renderDashboard();
+                        populateTaskAssignedToDropdown();
+                        populateStandupMemberDropdown();
+                        populateChatUserSelector();
+                    }}
+                ]
+            );
+        }
+
+        // --- Task Assignment & Kanban Board Logic ---
+        const kanbanBoard = document.getElementById('kanbanBoard');
+        const taskModal = document.getElementById('taskModal');
+        const taskModalTitle = document.getElementById('taskModalTitle');
+        const taskForm = document.getElementById('taskForm');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const closeTaskModalBtn = document.getElementById('closeTaskModal');
+        const cancelTaskFormBtn = document.getElementById('cancelTaskForm');
+        const taskAssignedToDropdown = document.getElementById('taskAssignedTo');
+
+        addTaskBtn.addEventListener('click', () => openTaskModal());
+        closeTaskModalBtn.addEventListener('click', () => taskModal.classList.add('hidden'));
+        cancelTaskFormBtn.addEventListener('click', () => taskModal.classList.add('hidden'));
+        taskForm.addEventListener('submit', handleTaskFormSubmit);
+
+        // Drag and Drop variables
+        let draggedTask = null;
+
+        /**
+         * Renders the Kanban board with tasks.
+         */
+        function renderKanbanBoard() {
+            document.querySelectorAll('.task-list').forEach(list => list.innerHTML = ''); // Clear existing tasks
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                column.removeEventListener('dragover', handleDragOver);
+                column.removeEventListener('drop', handleDrop);
+                column.addEventListener('dragover', handleDragOver);
+                column.addEventListener('drop', handleDrop);
+            });
+
+            const todoCount = document.getElementById('todoCount');
+            const inProgressCount = document.getElementById('inProgressCount');
+            const reviewCount = document.getElementById('reviewCount');
+            const doneCount = document.getElementById('doneCount');
+
+            let todo = 0, inProgress = 0, review = 0, done = 0;
+
+            appData.tasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.classList.add('task-card');
+                taskCard.setAttribute('draggable', 'true');
+                taskCard.dataset.taskId = task.id;
+
+                const assignedMember = appData.members.find(m => m.id === task.assignedTo);
+                const assignedToHtml = assignedMember ?
+                    `<div class="assigned-to">
+                        <img src="${assignedMember.avatar || 'https://placehold.co/24x24/E0E0E0/666666?text=U'}" alt="${assignedMember.name}">
+                        <span>${assignedMember.name}</span>
+                    </div>` :
+                    `<div class="assigned-to text-gray-500">Unassigned</div>`;
+
+                taskCard.innerHTML = `
+                    <h4>${task.title}</h4>
+                    <p>${task.description || 'No description.'}</p>
+                    <div class="meta">
+                        <span class="priority-tag priority-${task.priority.toLowerCase()}">${task.priority}</span>
+                        ${assignedToHtml}
+                    </div>
+                    <div class="actions admin-only dev-des-only">
+                        <button class="btn btn-outline btn-sm" onclick="openTaskModal('${task.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask('${task.id}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                `;
+
+                taskCard.addEventListener('dragstart', handleDragStart);
+
+                document.getElementById(`${task.status.toLowerCase().replace(' ', '')}Tasks`).appendChild(taskCard);
+
+                // Update counts
+                if (task.status === 'To-do') todo++;
+                else if (task.status === 'In Progress') inProgress++;
+                else if (task.status === 'Review') review++;
+                else if (task.status === 'Done') done++;
+            });
+
+            todoCount.textContent = todo;
+            inProgressCount.textContent = inProgress;
+            reviewCount.textContent = review;
+            doneCount.textContent = done;
+
+            applyRoleVisibility(kanbanBoard); // Apply role visibility after rendering
+        }
+
+        /**
+         * Populates the "Assigned To" dropdown in the task form.
+         */
+        function populateTaskAssignedToDropdown() {
+            taskAssignedToDropdown.innerHTML = '<option value="">Select Member</option>';
+            appData.members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.name;
+                taskAssignedToDropdown.appendChild(option);
+            });
+        }
+
+        /**
+         * Opens the task modal for adding or editing.
+         * @param {string} [taskId] - The ID of the task to edit (optional).
+         */
+        function openTaskModal(taskId) {
+            taskForm.reset();
+            document.getElementById('taskId').value = '';
+            taskModalTitle.textContent = 'Add New Task';
+
+            if (taskId) {
+                const task = appData.tasks.find(t => t.id === taskId);
+                if (task) {
+                    taskModalTitle.textContent = 'Edit Task';
+                    document.getElementById('taskId').value = task.id;
+                    document.getElementById('taskTitle').value = task.title;
+                    document.getElementById('taskDescription').value = task.description || '';
+                    document.getElementById('taskAssignedTo').value = task.assignedTo || '';
+                    document.getElementById('taskPriority').value = task.priority;
+                    document.getElementById('taskStatus').value = task.status;
+                    document.getElementById('taskStartDate').value = task.startDate;
+                    document.getElementById('taskEndDate').value = task.endDate;
+                }
+            }
+            taskModal.classList.remove('hidden');
+        }
+
+        /**
+         * Handles the submission of the task form.
+         * @param {Event} event - The form submit event.
+         */
+        function handleTaskFormSubmit(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('taskId').value || generateUniqueId();
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDescription').value;
+            const assignedTo = document.getElementById('taskAssignedTo').value;
+            const priority = document.getElementById('taskPriority').value;
+            const status = document.getElementById('taskStatus').value;
+            const startDate = document.getElementById('taskStartDate').value;
+            const endDate = document.getElementById('taskEndDate').value;
+
+            const newTask = { id, title, description, assignedTo, priority, status, startDate, endDate };
+
+            const existingIndex = appData.tasks.findIndex(t => t.id === id);
+            if (existingIndex > -1) {
+                appData.tasks[existingIndex] = newTask;
+            } else {
+                appData.tasks.push(newTask);
+            }
+
+            saveData(appData);
+            taskModal.classList.add('hidden');
+            renderKanbanBoard();
+            renderCalendar(); // Update calendar as well
+            renderSprintView();
+            renderDashboard(); // Update dashboard stats
+            renderGoals(); // Update goals if tasks are linked
+        }
+
+        /**
+         * Deletes a task.
+         * @param {string} taskId - The ID of the task to delete.
+         */
+        function deleteTask(taskId) {
+            showMessageBox(
+                'Confirm Deletion',
+                'Are you sure you want to delete this task?',
+                [
+                    { text: 'Cancel', className: 'btn-outline', callback: () => {} },
+                    { text: 'Delete', className: 'btn-danger', callback: () => {
+                        appData.tasks = appData.tasks.filter(t => t.id !== taskId);
+                        // Also remove this task from any linked goals
+                        appData.goals = appData.goals.map(goal => ({
+                            ...goal,
+                            linkedTasks: goal.linkedTasks.filter(tid => tid !== taskId)
+                        }));
+                        saveData(appData);
+                        renderKanbanBoard();
+                        renderCalendar();
+                        renderSprintView();
+                        renderDashboard();
+                        renderGoals();
+                    }}
+                ]
+            );
+        }
+
+        // Drag and Drop Handlers
+        function handleDragStart(e) {
+            draggedTask = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', e.target.dataset.taskId);
+            setTimeout(() => {
+                e.target.style.opacity = '0.5';
+            }, 0);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // Allow drop
+            const targetColumn = e.target.closest('.kanban-column');
+            if (targetColumn) {
+                targetColumn.style.boxShadow = '0 0 0 3px var(--primary-color) inset'; // Visual feedback
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const taskId = e.dataTransfer.getData('text/plain');
+            const droppedOnColumn = e.target.closest('.kanban-column');
+
+            if (droppedOnColumn && draggedTask) {
+                const newStatus = droppedOnColumn.dataset.status;
+                const taskIndex = appData.tasks.findIndex(t => t.id === taskId);
+
+                if (taskIndex > -1) {
+                    appData.tasks[taskIndex].status = newStatus;
+                    saveData(appData);
+                    renderKanbanBoard(); // Re-render the board to reflect changes
+                    renderDashboard(); // Update dashboard stats
+                }
+            }
+            if (droppedOnColumn) {
+                droppedOnColumn.style.boxShadow = ''; // Remove visual feedback
+            }
+            if (draggedTask) {
+                draggedTask.style.opacity = '1';
+                draggedTask = null;
+            }
+        }
+
+        // Reset shadow on drag leave
+        kanbanBoard.addEventListener('dragleave', (e) => {
+            const targetColumn = e.target.closest('.kanban-column');
+            if (targetColumn) {
+                targetColumn.style.boxShadow = 'inset 0 0 5px rgba(0,0,0,0.05)';
+            }
+        });
+        kanbanBoard.addEventListener('dragend', (e) => {
+            if (draggedTask) {
+                draggedTask.style.opacity = '1';
+                draggedTask = null;
+            }
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                column.style.boxShadow = 'inset 0 0 5px rgba(0,0,0,0.05)';
+            });
+        });
+
+
+        // --- Calendar & Sprint View Logic ---
+        const calendarGrid = document.getElementById('calendarGrid');
+        const currentMonthYearEl = document.getElementById('currentMonthYear');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const sprintWeeksContainer = document.getElementById('sprintWeeksContainer');
+
+        let currentCalendarDate = new Date(); // Tracks the month displayed in the calendar
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+        nextMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        /**
+         * Renders the monthly calendar.
+         */
+        function renderCalendar() {
+            calendarGrid.querySelectorAll('.calendar-day').forEach(day => day.remove()); // Clear old days
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth(); // 0-indexed
+
+            currentMonthYearEl.textContent = currentCalendarDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+            // Get first day of the month (0 = Sunday, 6 = Saturday)
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            // Get last day of the month
+            const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+            // Get last day of previous month
+            const lastDateOfPrevMonth = new Date(year, month, 0).getDate();
+
+            const today = new Date();
+            const todayDate = today.getDate();
+            const todayMonth = today.getMonth();
+            const todayYear = today.getFullYear();
+
+            let dayCounter = 1;
+            let prevMonthDayCounter = lastDateOfPrevMonth - firstDayOfMonth + 1;
+
+            // Render empty cells for previous month's days
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.classList.add('calendar-day');
+                dayEl.innerHTML = `<span class="day-number text-gray-500">${prevMonthDayCounter++}</span>`;
+                calendarGrid.appendChild(dayEl);
+            }
+
+            // Render current month's days
+            for (let i = 1; i <= lastDateOfMonth; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.classList.add('calendar-day', 'current-month');
+                if (i === todayDate && month === todayMonth && year === todayYear) {
+                    dayEl.classList.add('today');
+                }
+                dayEl.innerHTML = `<span class="day-number">${i}</span>`;
+
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                // Add tasks for this day
+                const tasksForDay = appData.tasks.filter(task => {
+                    const taskStartDate = new Date(task.startDate);
+                    const taskEndDate = new Date(task.endDate);
+                    const currentDate = new Date(dateString);
+                    // Check if the task spans this day
+                    return currentDate >= taskStartDate && currentDate <= taskEndDate;
+                });
+
+                tasksForDay.forEach(task => {
+                    const taskEntry = document.createElement('div');
+                    taskEntry.classList.add('task-entry');
+                    taskEntry.textContent = task.title;
+                    taskEntry.title = `${task.title} (${task.status})`;
+                    taskEntry.addEventListener('click', () => openTaskModal(task.id)); // Click to edit task
+                    dayEl.appendChild(taskEntry);
+                });
+
+                calendarGrid.appendChild(dayEl);
+            }
+
+            // Render empty cells for next month's days (to fill out the last row)
+            const totalDaysRendered = firstDayOfMonth + lastDateOfMonth;
+            const remainingCells = (7 - (totalDaysRendered % 7)) % 7; // Ensure a full last row
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.classList.add('calendar-day');
+                dayEl.innerHTML = `<span class="day-number text-gray-500">${i}</span>`;
+                calendarGrid.appendChild(dayEl);
+            }
+        }
+
+        /**
+         * Renders the sprint planning view.
+         */
+        function renderSprintView() {
+            sprintWeeksContainer.innerHTML = '';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day
+
+            // Group tasks by week
+            const tasksByWeek = {}; // Key: YYYY-MM-DD (start of week)
+
+            appData.tasks.forEach(task => {
+                const endDate = new Date(task.endDate);
+                endDate.setHours(0, 0, 0, 0); // Normalize
+                if (endDate < today && task.status === 'Done') {
+                    // Only show future tasks or tasks in progress
+                    return;
+                }
+
+                // Find the Sunday of the week for the task's end date
+                const startOfWeek = new Date(endDate);
+                startOfWeek.setDate(endDate.getDate() - endDate.getDay()); // Sunday
+                startOfWeek.setHours(0, 0, 0, 0);
+
+                const weekKey = startOfWeek.toISOString().split('T')[0];
+                if (!tasksByWeek[weekKey]) {
+                    tasksByWeek[weekKey] = [];
+                }
+                tasksByWeek[weekKey].push(task);
+            });
+
+            const sortedWeekKeys = Object.keys(tasksByWeek).sort();
+
+            if (sortedWeekKeys.length === 0) {
+                sprintWeeksContainer.innerHTML = '<p class="text-center text-gray-500">No upcoming tasks for sprint planning.</p>';
+                return;
+            }
+
+            sortedWeekKeys.forEach(weekKey => {
+                const weekStartDate = new Date(weekKey);
+                const weekEndDate = new Date(weekStartDate);
+                weekEndDate.setDate(weekEndDate.getDate() + 6); // Saturday
+
+                const tasksInWeek = tasksByWeek[weekKey];
+
+                const sprintWeekDiv = document.createElement('div');
+                sprintWeekDiv.classList.add('sprint-week');
+
+                let countdownHtml = '';
+                if (weekStartDate > today) {
+                    const diffTime = Math.abs(weekStartDate.getTime() - today.getTime());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    countdownHtml = `<span class="countdown">Starts in ${diffDays} days</span>`;
+                } else if (weekEndDate >= today) {
+                    countdownHtml = `<span class="countdown" style="color: var(--green-success);">Ongoing</span>`;
+                } else {
+                    countdownHtml = `<span class="countdown" style="color: var(--light-text-color);">Past</span>`;
+                }
+
+
+                sprintWeekDiv.innerHTML = `
+                    <div class="sprint-week-header">
+                        <h4>Week of ${weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</h4>
+                        ${countdownHtml}
+                    </div>
+                    <div class="sprint-tasks">
+                        ${tasksInWeek.map(task => `
+                            <div class="sprint-task-card" title="${task.description || ''}">
+                                ${task.title} (${task.status})
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                sprintWeeksContainer.appendChild(sprintWeekDiv);
+            });
+        }
+
+
+        // --- Daily Standup Summary Logic ---
+        const standupForm = document.getElementById('standupForm');
+        const standupSummariesList = document.getElementById('standupSummariesList');
+        const standupMemberDropdown = document.getElementById('standupMember');
+
+        standupForm.addEventListener('submit', handleStandupFormSubmit);
+
+        /**
+         * Populates the member dropdown for the standup form.
+         */
+        function populateStandupMemberDropdown() {
+            standupMemberDropdown.innerHTML = '<option value="">Select Yourself</option>';
+            appData.members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.name;
+                standupMemberDropdown.appendChild(option);
+            });
+            // Pre-select if there's only one member
+            if (appData.members.length === 1) {
+                standupMemberDropdown.value = appData.members[0].id;
+            }
+        }
+
+        /**
+         * Handles the submission of the standup form.
+         * @param {Event} event - The form submit event.
+         */
+        function handleStandupFormSubmit(event) {
+            event.preventDefault();
+
+            const memberId = standupMemberDropdown.value;
+            const member = appData.members.find(m => m.id === memberId);
+            if (!member) {
+                showMessageBox('Error', 'Please select a valid team member.', [{ text: 'OK', className: 'btn-primary' }]);
+                return;
+            }
+
+            const yesterday = document.getElementById('standupYesterday').value;
+            const today = document.getElementById('standupToday').value;
+            const blockers = document.getElementById('standupBlockers').value;
+            const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+            const newStandup = {
+                id: generateUniqueId(),
+                memberId,
+                memberName: member.name,
+                date,
+                yesterday,
+                today,
+                blockers
+            };
+
+            appData.standups.push(newStandup);
+            saveData(appData);
+            standupForm.reset();
+            populateStandupMemberDropdown(); // Re-populate to ensure single member is selected if applicable
+            renderStandupSummaries();
+            showMessageBox('Success', 'Daily standup submitted!', [{ text: 'OK', className: 'btn-primary' }]);
+        }
+
+        /**
+         * Renders the list of past standup summaries.
+         */
+        function renderStandupSummaries() {
+            standupSummariesList.innerHTML = '';
+            if (appData.standups.length === 0) {
+                standupSummariesList.innerHTML = '<p class="text-center text-gray-500">No standup summaries yet. Submit one!</p>';
+                return;
+            }
+
+            // Sort by date descending
+            const sortedStandups = appData.standups.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sortedStandups.forEach(standup => {
+                const standupItem = document.createElement('div');
+                standupItem.classList.add('standup-summary-item');
+                standupItem.innerHTML = `
+                    <h4>${standup.memberName}'s Standup</h4>
+                    <p><strong>Yesterday:</strong> ${standup.yesterday}</p>
+                    <p><strong>Today:</strong> ${standup.today}</p>
+                    <p><strong>Blockers:</strong> ${standup.blockers || 'None'}</p>
+                    <div class="date-info">Date: ${new Date(standup.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                `;
+                standupSummariesList.appendChild(standupItem);
+            });
+        }
+
+        // --- Internal Chat Simulator Logic ---
+        const chatMessagesEl = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+        const currentChatUserSelector = document.getElementById('currentChatUserSelector');
+
+        sendMessageBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        currentChatUserSelector.addEventListener('change', (e) => {
+            currentChatUserId = e.target.value;
+            appData.currentChatUserId = currentChatUserId;
+            saveData(appData);
+            renderChatMessages();
+        });
+
+        /**
+         * Populates the chat user selector dropdown.
+         */
+        function populateChatUserSelector() {
+            currentChatUserSelector.innerHTML = '<option value="">Select User to Chat As</option>';
+            appData.members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.name;
+                currentChatUserSelector.appendChild(option);
+            });
+            // Set selected value
+            if (currentChatUserId) {
+                currentChatUserSelector.value = currentChatUserId;
+            } else if (appData.members.length > 0) {
+                currentChatUserSelector.value = appData.members[0].id; // Default to first member
+                currentChatUserId = appData.members[0].id;
+                appData.currentChatUserId = currentChatUserId;
+                saveData(appData);
+            }
+        }
+
+        /**
+         * Renders chat messages.
+         */
+        function renderChatMessages() {
+            chatMessagesEl.innerHTML = '';
+            if (appData.messages.length === 0) {
+                chatMessagesEl.innerHTML = '<p class="text-center text-gray-500">No messages yet. Start a conversation!</p>';
+            }
+
+            appData.messages.forEach(msg => {
+                const sender = appData.members.find(m => m.id === msg.senderId);
+                const isSelf = msg.senderId === currentChatUserId;
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message');
+                if (isSelf) {
+                    messageDiv.classList.add('self');
+                } else {
+                    messageDiv.classList.add('other');
+                }
+
+                const avatarSrc = sender ? (sender.avatar || 'https://placehold.co/36x36/E0E0E0/666666?text=U') : 'https://placehold.co/36x36/E0E0E0/666666?text=U';
+                const senderName = sender ? sender.name : 'Unknown User';
+                const timestamp = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                messageDiv.innerHTML = `
+                    ${!isSelf ? `<img src="${avatarSrc}" alt="${senderName}">` : ''}
+                    <div class="message-content">
+                        <div class="message-info">
+                            ${!isSelf ? `<span class="sender-name">${senderName}</span>` : ''}
+                            <span class="timestamp">${timestamp}</span>
+                        </div>
+                        <div class="message-bubble">${msg.text}</div>
+                    </div>
+                    ${isSelf ? `<img src="${avatarSrc}" alt="${senderName}">` : ''}
+                `;
+                chatMessagesEl.appendChild(messageDiv);
+            });
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
+        }
+
+        /**
+         * Sends a new message.
+         */
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            if (!currentChatUserId) {
+                showMessageBox('Error', 'Please select a user to chat as.', [{ text: 'OK', className: 'btn-primary' }]);
+                return;
+            }
+
+            const newMessage = {
+                id: generateUniqueId(),
+                senderId: currentChatUserId,
+                timestamp: new Date().toISOString(),
+                text: text
+            };
+
+            appData.messages.push(newMessage);
+            saveData(appData);
+            chatInput.value = '';
+            renderChatMessages();
+        }
+
+        // --- Document Sharing Logic ---
+        const documentListEl = document.getElementById('documentList');
+        const documentModal = document.getElementById('documentModal');
+        const documentModalTitle = document.getElementById('documentModalTitle');
+        const documentForm = document.getElementById('documentForm');
+        const addDocumentBtn = document.getElementById('addDocumentBtn');
+        const closeDocumentModalBtn = document.getElementById('closeDocumentModal');
+        const cancelDocumentFormBtn = document.getElementById('cancelDocumentForm');
+
+        addDocumentBtn.addEventListener('click', () => openDocumentModal());
+        closeDocumentModalBtn.addEventListener('click', () => documentModal.classList.add('hidden'));
+        cancelDocumentFormBtn.addEventListener('click', () => documentModal.classList.add('hidden'));
+        documentForm.addEventListener('submit', handleDocumentFormSubmit);
+
+        /**
+         * Renders the list of documents.
+         */
+        function renderDocuments() {
+            documentListEl.innerHTML = '';
+            if (appData.documents.length === 0) {
+                documentListEl.innerHTML = '<p class="text-center text-gray-500">No documents shared yet. Click "Add Document" to share one!</p>';
+                return;
+            }
+            appData.documents.forEach(doc => {
+                const documentItem = document.createElement('div');
+                documentItem.classList.add('document-item');
+                documentItem.innerHTML = `
+                    <div class="document-item-info">
+                        <h4><a href="${doc.url}" target="_blank" rel="noopener noreferrer">${doc.title} <i class="fas fa-external-link-alt text-xs ml-1"></i></a></h4>
+                        <p>${doc.description || 'No description provided.'}</p>
+                        <span class="category-tag">${doc.category}</span>
+                    </div>
+                    <div class="actions admin-only">
+                        <button class="btn btn-outline btn-sm" onclick="openDocumentModal('${doc.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.id}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                `;
+                documentListEl.appendChild(documentItem);
+            });
+            applyRoleVisibility(documentListEl);
+        }
+
+        /**
+         * Opens the document modal for adding or editing.
+         * @param {string} [documentId] - The ID of the document to edit (optional).
+         */
+        function openDocumentModal(documentId) {
+            documentForm.reset();
+            document.getElementById('documentId').value = '';
+            documentModalTitle.textContent = 'Add New Document';
+
+            if (documentId) {
+                const doc = appData.documents.find(d => d.id === documentId);
+                if (doc) {
+                    documentModalTitle.textContent = 'Edit Document';
+                    document.getElementById('documentId').value = doc.id;
+                    document.getElementById('documentTitle').value = doc.title;
+                    document.getElementById('documentUrl').value = doc.url;
+                    document.getElementById('documentDescription').value = doc.description || '';
+                    document.getElementById('documentCategory').value = doc.category;
+                }
+            }
+            documentModal.classList.remove('hidden');
+        }
+
+        /**
+         * Handles the submission of the document form.
+         * @param {Event} event - The form submit event.
+         */
+        function handleDocumentFormSubmit(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('documentId').value || generateUniqueId();
+            const title = document.getElementById('documentTitle').value;
+            const url = document.getElementById('documentUrl').value;
+            const description = document.getElementById('documentDescription').value;
+            const category = document.getElementById('documentCategory').value;
+
+            const newDocument = { id, title, url, description, category };
+
+            const existingIndex = appData.documents.findIndex(d => d.id === id);
+            if (existingIndex > -1) {
+                appData.documents[existingIndex] = newDocument;
+            } else {
+                appData.documents.push(newDocument);
+            }
+
+            saveData(appData);
+            documentModal.classList.add('hidden');
+            renderDocuments();
+        }
+
+        /**
+         * Deletes a document.
+         * @param {string} documentId - The ID of the document to delete.
+         */
+        function deleteDocument(documentId) {
+            showMessageBox(
+                'Confirm Deletion',
+                'Are you sure you want to delete this document?',
+                [
+                    { text: 'Cancel', className: 'btn-outline', callback: () => {} },
+                    { text: 'Delete', className: 'btn-danger', callback: () => {
+                        appData.documents = appData.documents.filter(d => d.id !== documentId);
+                        saveData(appData);
+                        renderDocuments();
+                    }}
+                ]
+            );
+        }
+
+        // --- Project Goals Logic ---
+        const goalListEl = document.getElementById('goalList');
+        const goalModal = document.getElementById('goalModal');
+        const goalModalTitle = document.getElementById('goalModalTitle');
+        const goalForm = document.getElementById('goalForm');
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        const closeGoalModalBtn = document.getElementById('closeGoalModal');
+        const cancelGoalFormBtn = document.getElementById('cancelGoalForm');
+        const goalLinkedTasksDropdown = document.getElementById('goalLinkedTasks');
+
+        addGoalBtn.addEventListener('click', () => openGoalModal());
+        closeGoalModalBtn.addEventListener('click', () => goalModal.classList.add('hidden'));
+        cancelGoalFormBtn.addEventListener('click', () => goalModal.classList.add('hidden'));
+        goalForm.addEventListener('submit', handleGoalFormSubmit);
+
+        /**
+         * Populates the "Linked Tasks" dropdown in the goal form.
+         */
+        function populateGoalLinkedTasksDropdown() {
+            goalLinkedTasksDropdown.innerHTML = '';
+            appData.tasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.id;
+                option.textContent = `${task.title} (${task.status})`;
+                goalLinkedTasksDropdown.appendChild(option);
+            });
+        }
+
+        /**
+         * Renders the list of project goals.
+         */
+        function renderGoals() {
+            goalListEl.innerHTML = '';
+            if (appData.goals.length === 0) {
+                goalListEl.innerHTML = '<p class="text-center text-gray-500">No project goals set yet. Click "Set New Goal" to add one!</p>';
+                return;
+            }
+            appData.goals.forEach(goal => {
+                // Calculate progress based on linked tasks
+                let completedTasks = 0;
+                goal.linkedTasks.forEach(taskId => {
+                    const task = appData.tasks.find(t => t.id === taskId);
+                    if (task && task.status === 'Done') {
+                        completedTasks++;
+                    }
+                });
+                const progress = goal.linkedTasks.length > 0 ? Math.round((completedTasks / goal.linkedTasks.length) * 100) : 0;
+
+                const goalItem = document.createElement('div');
+                goalItem.classList.add('goal-item');
+                goalItem.innerHTML = `
+                    <h4>${goal.title}</h4>
+                    <p>${goal.description || 'No description.'}</p>
+                    <div class="goal-progress-bar">
+                        <div class="goal-progress-fill" style="width: ${progress}%;"></div>
+                    </div>
+                    <div class="goal-progress-text">${progress}% Complete</div>
+                    <div class="meta">
+                        <span>Target Date: ${new Date(goal.targetDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                        <span>Linked Tasks: ${goal.linkedTasks.length}</span>
+                    </div>
+                    <div class="actions admin-only">
+                        <button class="btn btn-outline btn-sm" onclick="openGoalModal('${goal.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGoal('${goal.id}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                `;
+                goalListEl.appendChild(goalItem);
+            });
+            applyRoleVisibility(goalListEl);
+        }
+
+        /**
+         * Opens the goal modal for adding or editing.
+         * @param {string} [goalId] - The ID of the goal to edit (optional).
+         */
+        function openGoalModal(goalId) {
+            goalForm.reset();
+            document.getElementById('goalId').value = '';
+            goalModalTitle.textContent = 'Set New Goal';
+            populateGoalLinkedTasksDropdown(); // Always re-populate to ensure latest tasks are available
+
+            if (goalId) {
+                const goal = appData.goals.find(g => g.id === goalId);
+                if (goal) {
+                    goalModalTitle.textContent = 'Edit Goal';
+                    document.getElementById('goalId').value = goal.id;
+                    document.getElementById('goalTitle').value = goal.title;
+                    document.getElementById('goalDescription').value = goal.description || '';
+                    document.getElementById('goalTargetDate').value = goal.targetDate;
+
+                    // Select linked tasks in the multiselect
+                    const options = goalLinkedTasksDropdown.options;
+                    for (let i = 0; i < options.length; i++) {
+                        options[i].selected = goal.linkedTasks.includes(options[i].value);
+                    }
+                }
+            }
+            goalModal.classList.remove('hidden');
+        }
+
+        /**
+         * Handles the submission of the goal form.
+         * @param {Event} event - The form submit event.
+         */
+        function handleGoalFormSubmit(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('goalId').value || generateUniqueId();
+            const title = document.getElementById('goalTitle').value;
+            const description = document.getElementById('goalDescription').value;
+            const targetDate = document.getElementById('goalTargetDate').value;
+            const selectedTasks = Array.from(goalLinkedTasksDropdown.selectedOptions).map(option => option.value);
+
+            const newGoal = { id, title, description, targetDate, linkedTasks: selectedTasks };
+
+            const existingIndex = appData.goals.findIndex(g => g.id === id);
+            if (existingIndex > -1) {
+                appData.goals[existingIndex] = newGoal;
+            } else {
+                appData.goals.push(newGoal);
+            }
+
+            saveData(appData);
+            goalModal.classList.add('hidden');
+            renderGoals();
+            renderDashboard(); // Update dashboard stats
+        }
+
+        /**
+         * Deletes a goal.
+         * @param {string} goalId - The ID of the goal to delete.
+         */
+        function deleteGoal(goalId) {
+            showMessageBox(
+                'Confirm Deletion',
+                'Are you sure you want to delete this goal?',
+                [
+                    { text: 'Cancel', className: 'btn-outline', callback: () => {} },
+                    { text: 'Delete', className: 'btn-danger', callback: () => {
+                        appData.goals = appData.goals.filter(g => g.id !== goalId);
+                        saveData(appData);
+                        renderGoals();
+                        renderDashboard();
+                    }}
+                ]
+            );
+        }
+
+        // Initial Data Population (if localStorage is empty)
+        function initializeAppData() {
+            if (appData.members.length === 0 && appData.tasks.length === 0) {
+                appData.members = [
+                    { id: 'm1', name: 'Alice Johnson', role: 'Admin', avatar: 'https://placehold.co/80x80/FFDDC1/FF6700?text=AJ', email: 'alice@example.com', skillset: ['Leadership', 'Strategy', 'Project Mgmt'], group: 'Admin', status: 'Active' },
+                    { id: 'm2', name: 'Bob Smith', role: 'Developer', avatar: 'https://placehold.co/80x80/CCEEFF/007BFF?text=BS', email: 'bob@example.com', skillset: ['JavaScript', 'React', 'Node.js'], group: 'Frontend', status: 'Active' },
+                    { id: 'm3', name: 'Charlie Brown', role: 'Designer', avatar: 'https://placehold.co/80x80/D1C4E9/673AB7?text=CB', email: 'charlie@example.com', skillset: ['UI/UX', 'Figma', 'Prototyping'], group: 'Design', status: 'Active' },
+                    { id: 'm4', name: 'Diana Prince', role: 'Developer', avatar: 'https://placehold.co/80x80/C8E6C9/4CAF50?text=DP', email: 'diana@example.com', skillset: ['Python', 'Django', 'SQL'], group: 'Backend', status: 'On Leave' },
+                    { id: 'm5', name: 'Eve Adams', role: 'QA', avatar: 'https://placehold.co/80x80/FFF9C4/FFC107?text=EA', email: 'eve@example.com', skillset: ['Manual Testing', 'Automation', 'Jira'], group: 'QA', status: 'Active' }
+                ];
+
+                appData.tasks = [
+                    { id: 't1', title: 'Design Homepage Layout', description: 'Create wireframes and high-fidelity mockups for the new homepage.', assignedTo: 'm3', priority: 'High', status: 'In Progress', startDate: '2025-07-08', endDate: '2025-07-15' },
+                    { id: 't2', title: 'Implement User Authentication', description: 'Develop frontend and backend for user login/signup.', assignedTo: 'm2', priority: 'High', status: 'To-do', startDate: '2025-07-10', endDate: '2025-07-20' },
+                    { id: 't3', title: 'Database Schema Review', description: 'Review and optimize the database schema for performance.', assignedTo: 'm4', priority: 'Medium', status: 'Review', startDate: '2025-07-01', endDate: '2025-07-05' },
+                    { id: 't4', title: 'Write API Documentation', description: 'Document all new REST API endpoints for developers.', assignedTo: 'm1', priority: 'Low', status: 'Done', startDate: '2025-06-25', endDate: '2025-06-30' },
+                    { id: 't5', title: 'Develop Task Kanban Board', description: 'Implement drag-and-drop Kanban functionality.', assignedTo: 'm2', priority: 'High', status: 'In Progress', startDate: '2025-07-10', endDate: '2025-07-25' },
+                    { id: 't6', title: 'Perform Regression Testing', description: 'Full regression test cycle for the new release.', assignedTo: 'm5', priority: 'Medium', status: 'To-do', startDate: '2025-07-12', endDate: '2025-07-18' },
+                    { id: 't7', title: 'UX Research for Onboarding', description: 'Conduct user interviews and gather feedback for onboarding flow.', assignedTo: 'm3', priority: 'Medium', status: 'To-do', startDate: '2025-07-15', endDate: '2025-07-22' }
+                ];
+
+                appData.standups = [
+                    { id: 's1', memberId: 'm2', memberName: 'Bob Smith', date: '2025-07-10', yesterday: 'Fixed login bug, started task T5.', today: 'Continue T5, review PRs.', blockers: 'None.' },
+                    { id: 's2', memberId: 'm3', memberName: 'Charlie Brown', date: '2025-07-10', yesterday: 'Completed homepage wireframes.', today: 'Start high-fidelity mockups for homepage.', blockers: 'Waiting for content from marketing.' }
+                ];
+
+                appData.messages = [
+                    { id: 'msg1', senderId: 'm1', timestamp: '2025-07-10T09:00:00Z', text: 'Good morning team! Let\'s have a productive day.' },
+                    { id: 'msg2', senderId: 'm2', timestamp: '2025-07-10T09:05:00Z', text: 'Morning Alice! Ready to tackle the Kanban board.' },
+                    { id: 'msg3', senderId: 'm3', timestamp: '2025-07-10T09:10:00Z', text: 'Hey everyone, just uploaded the latest design docs for review.' },
+                ];
+
+                appData.documents = [
+                    { id: 'd1', title: 'Product Roadmap Q3 2025', url: 'https://example.com/roadmap_q3.pdf', description: 'Overview of product features planned for Q3.', category: 'Specs' },
+                    { id: 'd2', title: 'API Endpoints v1.0', url: 'https://example.com/api_docs.html', description: 'Comprehensive documentation for all public APIs.', category: 'APIs' },
+                    { id: 'd3', title: 'Homepage Redesign Wireframes', url: 'https://figma.com/project/homepage-wireframes', description: 'Initial wireframes for the new homepage design.', category: 'Design Docs' }
+                ];
+
+                appData.goals = [
+                    { id: 'g1', title: 'Launch New Homepage', description: 'Complete development and deployment of the redesigned homepage.', targetDate: '2025-08-31', linkedTasks: ['t1', 't2', 't5'] },
+                    { id: 'g2', title: 'Improve System Performance by 20%', description: 'Optimize database queries and backend services.', targetDate: '2025-09-30', linkedTasks: ['t3'] }
+                ];
+
+                appData.currentChatUserId = appData.members[0].id; // Set default chat user
+                saveData(appData);
+            }
+        }
+
+        // Run initializations
+        initializeAppData();
+        // Initial render of the current section based on hash or default
+        // This is handled by the DOMContentLoaded listener.
+        // updateRoleBasedUI() is also called there.
+
+    </script>
+</body>
+</html>
