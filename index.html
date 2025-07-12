@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Chart.js for productivity charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* Global Styles */
         :root {
@@ -28,6 +30,23 @@
             --blue-info: #2196F3;
         }
 
+        /* Dark Mode Variables */
+        body.dark-mode {
+            --primary-color: #6A9EEB;
+            --secondary-color: #72E0C9;
+            --background-color: #1A1A2E;
+            --surface-color: #2E2E4A;
+            --text-color: #E0E0E0;
+            --light-text-color: #A0A0A0;
+            --border-color: #444466;
+            --shadow-light: rgba(0, 0, 0, 0.2);
+            --shadow-medium: rgba(0, 0, 0, 0.4);
+            --red-alert: #E57373;
+            --green-success: #AED581;
+            --yellow-warning: #FFD54F;
+            --blue-info: #64B5F6;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -37,6 +56,7 @@
             display: flex;
             min-height: 100vh;
             overflow-x: hidden; /* Prevent horizontal scrolling */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Utility Classes */
@@ -72,6 +92,7 @@
             font-weight: 500;
             transition: background-color 0.2s ease, transform 0.1s ease;
             box-shadow: 0 2px 4px var(--shadow-light);
+            color: var(--text-color); /* Default for dark mode */
         }
         .btn-primary {
             background-color: var(--primary-color);
@@ -81,6 +102,9 @@
             background-color: #3A7BD5;
             transform: translateY(-1px);
         }
+        body.dark-mode .btn-primary:hover {
+            background-color: #5A8EDD;
+        }
         .btn-secondary {
             background-color: var(--secondary-color);
             color: var(--text-color);
@@ -88,6 +112,12 @@
         .btn-secondary:hover {
             background-color: #3AD5B4;
             transform: translateY(-1px);
+        }
+        body.dark-mode .btn-secondary {
+            color: var(--text-color);
+        }
+        body.dark-mode .btn-secondary:hover {
+            background-color: #5FD1B7;
         }
         .btn-danger {
             background-color: var(--red-alert);
@@ -97,12 +127,23 @@
             background-color: #D32F2F;
             transform: translateY(-1px);
         }
+        body.dark-mode .btn-danger:hover {
+            background-color: #CC6262;
+        }
         .btn-outline {
             background-color: transparent;
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
         }
         .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        body.dark-mode .btn-outline {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        body.dark-mode .btn-outline:hover {
             background-color: var(--primary-color);
             color: white;
         }
@@ -127,6 +168,7 @@
             font-size: 1rem;
             background-color: var(--background-color);
             color: var(--text-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
         .form-group input:focus,
         .form-group select:focus,
@@ -134,6 +176,13 @@
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select,
+        body.dark-mode .form-group textarea {
+            background-color: var(--surface-color);
+            border-color: var(--border-color);
+            color: var(--text-color);
         }
         .form-actions {
             display: flex;
@@ -156,6 +205,7 @@
             height: 100vh;
             overflow-y: auto;
             z-index: 1000;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .sidebar-header {
             text-align: center;
@@ -196,6 +246,11 @@
             background-color: var(--primary-color);
             color: white;
         }
+        body.dark-mode .sidebar-nav a:hover,
+        body.dark-mode .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
         .sidebar-footer {
             margin-top: auto;
             padding-top: 1rem;
@@ -232,6 +287,7 @@
             box-shadow: 0 6px 12px var(--shadow-medium);
             margin-bottom: 1.5rem;
             border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .card-header {
             display: flex;
@@ -245,6 +301,7 @@
             margin: 0;
             font-size: 1.25rem;
             font-weight: 600;
+            color: var(--text-color);
         }
 
         /* Modals */
@@ -268,6 +325,7 @@
             max-width: 600px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             position: relative;
+            transition: background-color 0.3s ease;
         }
         .modal-close-btn {
             position: absolute;
@@ -318,6 +376,7 @@
             border-radius: 0.75rem;
             background-color: var(--surface-color);
             box-shadow: 0 4px 8px var(--shadow-light);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .member-card img {
             width: 80px;
@@ -331,6 +390,7 @@
             margin: 0.5rem 0 0.25rem;
             font-size: 1.2rem;
             font-weight: 600;
+            color: var(--text-color);
         }
         .member-card .role {
             color: var(--primary-color);
@@ -350,12 +410,14 @@
             margin-bottom: 1rem;
         }
         .member-card .skill {
-            background-color: #E6EEF9;
-            color: #4A90E2;
+            background-color: var(--background-color); /* Adjusted for dark mode */
+            color: var(--primary-color);
             padding: 0.3rem 0.7rem;
             border-radius: 0.3rem;
             font-size: 0.8rem;
             font-weight: 500;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         .member-card .status-badge {
             padding: 0.25rem 0.6rem;
@@ -386,6 +448,7 @@
             padding: 1rem;
             box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Inner shadow for depth */
             min-height: 200px; /* Ensure columns have some height */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         .kanban-column-header {
             font-size: 1.1rem;
@@ -396,6 +459,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text-color);
         }
         .kanban-column-header .task-count {
             background-color: var(--primary-color);
@@ -412,7 +476,7 @@
             margin-bottom: 0.75rem;
             cursor: grab;
             border: 1px solid var(--border-color);
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.3s ease, border-color 0.3s ease;
         }
         .task-card:active {
             cursor: grabbing;
@@ -423,6 +487,7 @@
             margin: 0 0 0.5rem;
             font-size: 1rem;
             font-weight: 600;
+            color: var(--text-color);
         }
         .task-card p {
             font-size: 0.85rem;
@@ -477,6 +542,7 @@
             padding: 1rem;
             border-radius: 0.75rem;
             box-shadow: var(--shadow-light);
+            transition: background-color 0.3s ease;
         }
         .calendar-nav button {
             background: none;
@@ -499,6 +565,7 @@
             padding: 1rem;
             border-radius: 0.75rem;
             box-shadow: var(--shadow-light);
+            transition: background-color 0.3s ease;
         }
         .calendar-day-header {
             font-weight: 600;
@@ -516,6 +583,7 @@
             border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         .calendar-day.current-month {
             background-color: var(--surface-color);
@@ -557,6 +625,7 @@
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow-light);
             border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .sprint-week-header {
             display: flex;
@@ -570,6 +639,7 @@
             margin: 0;
             font-size: 1.1rem;
             font-weight: 600;
+            color: var(--text-color);
         }
         .sprint-week-header .countdown {
             font-weight: 600;
@@ -581,15 +651,16 @@
             gap: 0.75rem;
         }
         .sprint-task-card {
-            background-color: #E6EEF9;
-            color: #4A90E2;
+            background-color: var(--background-color); /* Adjusted for dark mode */
+            color: var(--primary-color);
             padding: 0.6rem 1rem;
             border-radius: 0.5rem;
             font-size: 0.9rem;
             font-weight: 500;
             flex: 1 1 calc(33% - 0.75rem); /* 3 cards per row on larger screens */
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid rgba(74, 144, 226, 0.2);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         @media (max-width: 768px) {
             .sprint-task-card {
@@ -611,6 +682,7 @@
             border-radius: 0.75rem;
             overflow: hidden;
             background-color: var(--surface-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         .chat-header {
             padding: 1rem;
@@ -627,6 +699,7 @@
             flex-direction: column;
             gap: 0.75rem;
             background-color: var(--background-color);
+            transition: background-color 0.3s ease;
         }
         .chat-message {
             display: flex;
@@ -641,6 +714,7 @@
             color: var(--text-color);
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px var(--shadow-light);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
         .chat-message.self .message-bubble {
             background-color: var(--primary-color);
@@ -673,21 +747,13 @@
             font-weight: 600;
             margin-right: 0.5rem;
         }
-        .chat-message.self .message-info .sender-name {
-            color: var(--primary-color); /* No specific change for self, but useful if different */
-        }
-        .message-bubble {
-            padding: 0.75rem 1rem;
-            border-radius: 1.2rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
         .chat-input-area {
             display: flex;
             padding: 1rem;
             border-top: 1px solid var(--border-color);
             background-color: var(--surface-color);
             gap: 0.75rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         .chat-input-area input {
             flex-grow: 1;
@@ -696,6 +762,7 @@
             border-radius: 1.5rem;
             font-size: 1rem;
             background-color: var(--background-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
         .chat-input-area button {
             background-color: var(--primary-color);
@@ -731,6 +798,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .document-item-info {
             flex-grow: 1;
@@ -739,6 +807,7 @@
             margin: 0 0 0.5rem;
             font-size: 1rem;
             font-weight: 600;
+            color: var(--text-color);
         }
         .document-item p {
             font-size: 0.85rem;
@@ -754,12 +823,14 @@
             text-decoration: underline;
         }
         .document-item .category-tag {
-            background-color: #E6EEF9;
-            color: #4A90E2;
+            background-color: var(--background-color); /* Adjusted for dark mode */
+            color: var(--primary-color);
             padding: 0.2rem 0.6rem;
             border-radius: 0.3rem;
             font-size: 0.75rem;
             font-weight: 500;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         .document-item .actions {
             display: flex;
@@ -778,11 +849,13 @@
             border-radius: 0.75rem;
             box-shadow: 0 4px 8px var(--shadow-light);
             border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .goal-item h4 {
             margin: 0 0 0.5rem;
             font-size: 1.1rem;
             font-weight: 600;
+            color: var(--text-color);
         }
         .goal-item p {
             font-size: 0.9rem;
@@ -795,12 +868,13 @@
             height: 10px;
             overflow: hidden;
             margin-bottom: 0.5rem;
+            transition: background-color 0.3s ease;
         }
         .goal-progress-fill {
             height: 100%;
             background-color: var(--secondary-color);
             border-radius: 0.5rem;
-            transition: width 0.5s ease-in-out;
+            transition: width 0.5s ease-in-out, background-color 0.3s ease;
         }
         .goal-progress-text {
             font-size: 0.85rem;
@@ -833,6 +907,7 @@
             border-radius: 0.75rem;
             box-shadow: var(--shadow-light);
             margin-bottom: 1.5rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .standup-summary-list {
             display: flex;
@@ -845,6 +920,7 @@
             border-radius: 0.6rem;
             box-shadow: 0 2px 5px var(--shadow-light);
             border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .standup-summary-item h4 {
             margin: 0 0 0.5rem;
@@ -856,6 +932,7 @@
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
             line-height: 1.4;
+            color: var(--text-color);
         }
         .standup-summary-item .date-info {
             font-size: 0.8rem;
@@ -864,6 +941,158 @@
             padding-top: 0.5rem;
             border-top: 1px dashed var(--border-color);
         }
+
+        /* Bug Tracker */
+        .bug-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .bug-item {
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 2px 5px var(--shadow-light);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .bug-item h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .bug-item p {
+            font-size: 0.85rem;
+            color: var(--light-text-color);
+            margin-bottom: 0.5rem;
+        }
+        .bug-item .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--light-text-color);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border-color);
+        }
+        .bug-item .status-tag {
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+        }
+        .bug-status-open { background-color: var(--red-alert); }
+        .bug-status-in-progress { background-color: var(--yellow-warning); }
+        .bug-status-fixed { background-color: var(--green-success); }
+        .bug-item .actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        /* Tech Stack Matrix */
+        .tech-stack-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background-color: var(--surface-color);
+            border-radius: 0.75rem;
+            overflow: hidden; /* For rounded corners */
+            box-shadow: 0 4px 8px var(--shadow-light);
+            transition: background-color 0.3s ease;
+        }
+        .tech-stack-table th, .tech-stack-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.8rem;
+            text-align: left;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+        .tech-stack-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .tech-stack-table tr:nth-child(even) {
+            background-color: var(--background-color);
+        }
+        .tech-stack-table .skill-tag {
+            background-color: var(--background-color); /* Adjusted for dark mode */
+            color: var(--primary-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0.2rem;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Dark Mode Toggle Switch */
+        .dark-mode-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .dark-mode-toggle label {
+            margin-left: 0.5rem;
+            font-weight: 500;
+            color: var(--light-text-color);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--light-text-color);
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--primary-color);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
 
         /* Responsive Adjustments */
         @media (max-width: 1024px) {
@@ -1025,6 +1254,7 @@
             max-width: 400px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             text-align: center;
+            transition: background-color 0.3s ease;
         }
         .message-box h3 {
             margin-top: 0;
@@ -1061,6 +1291,8 @@
                 <li><a href="#chat" class="nav-link" data-target="chat-section"><i class="fas fa-comments"></i> Chat Simulator</a></li>
                 <li><a href="#documents" class="nav-link" data-target="documents-section"><i class="fas fa-folder-open"></i> Documents</a></li>
                 <li><a href="#goals" class="nav-link" data-target="goals-section"><i class="fas fa-bullseye"></i> Project Goals</a></li>
+                <li><a href="#bug-tracker" class="nav-link" data-target="bug-tracker-section"><i class="fas fa-bug"></i> Bug Tracker</a></li>
+                <li><a href="#tech-stack" class="nav-link" data-target="tech-stack-section"><i class="fas fa-code"></i> Tech Stack</a></li>
             </ul>
         </nav>
         <div class="sidebar-footer">
@@ -1070,7 +1302,15 @@
                     <option value="admin">Admin</option>
                     <option value="developer">Developer</option>
                     <option value="designer">Designer</option>
+                    <option value="qa">QA</option>
                 </select>
+            </div>
+            <div class="dark-mode-toggle">
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+                <label for="darkModeToggle">Dark Mode</label>
             </div>
             <p>&copy; 2025 DevTeamHub</p>
         </div>
@@ -1115,6 +1355,13 @@
                     <h3>Member Productivity</h3>
                 </div>
                 <canvas id="memberProductivityChart"></canvas>
+            </div>
+
+            <div class="card mt-4 admin-only">
+                <div class="card-header">
+                    <h3>Reports</h3>
+                </div>
+                <button class="btn btn-primary w-full" id="generateWeeklyReportBtn"><i class="fas fa-file-pdf mr-2"></i> Generate Weekly Report (PDF)</button>
             </div>
         </section>
 
@@ -1169,7 +1416,6 @@
                                 <option value="Backend">Backend</option>
                                 <option value="Design">Design</option>
                                 <option value="QA">QA</option>
-                            </option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -1478,11 +1724,102 @@
                 </div>
             </div>
         </section>
+
+        <!-- Bug Tracker Section -->
+        <section id="bug-tracker-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Bug Tracker</h1>
+                <button class="btn btn-primary admin-only dev-des-only qa-only" id="addBugBtn"><i class="fas fa-bug mr-2"></i> Report Bug</button>
+            </div>
+            <div class="bug-list" id="bugList">
+                <!-- Bugs will be rendered here -->
+            </div>
+
+            <!-- Add/Edit Bug Modal -->
+            <div id="bugModal" class="modal hidden">
+                <div class="modal-content">
+                    <button class="modal-close-btn" id="closeBugModal">&times;</button>
+                    <h3><span id="bugModalTitle">Report New Bug</span></h3>
+                    <form id="bugForm">
+                        <input type="hidden" id="bugId">
+                        <div class="form-group">
+                            <label for="bugTitle">Bug Title</label>
+                            <input type="text" id="bugTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bugDescription">Description</label>
+                            <textarea id="bugDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="bugReportedBy">Reported By</label>
+                            <select id="bugReportedBy" required>
+                                <option value="">Select Reporter</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bugAssignedTo">Assigned To</label>
+                            <select id="bugAssignedTo">
+                                <option value="">Unassigned</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bugPriority">Priority</label>
+                            <select id="bugPriority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bugStatus">Status</label>
+                            <select id="bugStatus" required>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Fixed">Fixed</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" id="cancelBugForm">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Bug</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Matrix Section -->
+        <section id="tech-stack-section" class="page-section hidden">
+            <div class="page-header">
+                <h1>Tech Stack Matrix</h1>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Team Member Skills & Proficiency</h3>
+                </div>
+                <table class="tech-stack-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Role</th>
+                            <th>Skills</th>
+                        </tr>
+                    </thead>
+                    <tbody id="techStackTableBody">
+                        <!-- Tech stack matrix will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <script>
         // Utility Functions
         const STORAGE_KEY = 'devTeamHubData';
+        const DARK_MODE_KEY = 'devTeamHubDarkMode';
 
         /**
          * Generates a unique ID.
@@ -1506,6 +1843,7 @@
                     messages: [],
                     documents: [],
                     goals: [],
+                    bugs: [], // New: Bug Tracker
                     currentUserRole: 'admin', // Default role
                     currentChatUserId: null,
                 };
@@ -1519,6 +1857,7 @@
                     messages: [],
                     documents: [],
                     goals: [],
+                    bugs: [],
                     currentUserRole: 'admin',
                     currentChatUserId: null,
                 };
@@ -1549,6 +1888,7 @@
         const roleSelector = document.getElementById('roleSelector');
         const messageBoxContainer = document.getElementById('messageBoxContainer');
         const offlineStatusBadge = document.getElementById('offlineStatus');
+        const darkModeToggle = document.getElementById('darkModeToggle');
 
         // --- Message Box Implementation (for custom alerts/confirms) ---
         /**
@@ -1589,7 +1929,7 @@
          * Updates the UI based on the current user role.
          */
         function updateRoleBasedUI() {
-            document.body.classList.remove('role-admin', 'role-developer', 'role-designer');
+            document.body.classList.remove('role-admin', 'role-developer', 'role-designer', 'role-qa'); // Added 'role-qa'
             document.body.classList.add(`role-${currentUserRole}`);
 
             // Update role selector
@@ -1651,6 +1991,12 @@
             } else if (sectionId === 'goals-section') {
                 renderGoals();
                 populateGoalLinkedTasksDropdown();
+            } else if (sectionId === 'bug-tracker-section') { // New section
+                renderBugs();
+                populateBugAssignedToDropdown();
+                populateBugReportedByDropdown();
+            } else if (sectionId === 'tech-stack-section') { // New section
+                renderTechStackMatrix();
             }
 
             // Apply role-based visibility after rendering section content
@@ -1662,23 +2008,18 @@
          * @param {HTMLElement} container - The container element.
          */
         function applyRoleVisibility(container) {
-            container.querySelectorAll('.admin-only, .developer-only, .designer-only, .dev-des-only, .admin-des-only, .admin-dev-only').forEach(el => {
+            container.querySelectorAll('.admin-only, .developer-only, .designer-only, .qa-only, .dev-des-only, .admin-des-only, .admin-dev-only, .dev-qa-only, .admin-qa-only, .des-qa-only').forEach(el => {
                 el.classList.add('hidden'); // Hide all by default
             });
 
             if (currentUserRole === 'admin') {
-                container.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                container.querySelectorAll('.admin-only, .admin-dev-only, .admin-des-only, .admin-qa-only').forEach(el => el.classList.remove('hidden'));
             } else if (currentUserRole === 'developer') {
-                container.querySelectorAll('.developer-only, .dev-des-only').forEach(el => el.classList.remove('hidden'));
+                container.querySelectorAll('.developer-only, .dev-des-only, .admin-dev-only, .dev-qa-only').forEach(el => el.classList.remove('hidden'));
             } else if (currentUserRole === 'designer') {
-                container.querySelectorAll('.designer-only, .dev-des-only').forEach(el => el.classList.remove('hidden'));
-            }
-            // For combined roles, ensure they are shown if any of their roles are active
-            if (currentUserRole === 'admin' || currentUserRole === 'developer') {
-                container.querySelectorAll('.admin-dev-only').forEach(el => el.classList.remove('hidden'));
-            }
-            if (currentUserRole === 'admin' || currentUserRole === 'designer') {
-                container.querySelectorAll('.admin-des-only').forEach(el => el.classList.remove('hidden'));
+                container.querySelectorAll('.designer-only, .dev-des-only, .admin-des-only, .des-qa-only').forEach(el => el.classList.remove('hidden'));
+            } else if (currentUserRole === 'qa') { // New QA role
+                container.querySelectorAll('.qa-only, .dev-qa-only, .admin-qa-only, .des-qa-only').forEach(el => el.classList.remove('hidden'));
             }
         }
 
@@ -1706,7 +2047,33 @@
             updateRoleBasedUI(); // Apply role visibility on initial load
             checkOnlineStatus(); // Check online status on load
             setInterval(checkOnlineStatus, 5000); // Check every 5 seconds
+            loadDarkModePreference(); // Load dark mode preference
         });
+
+        // --- Dark Mode Toggle Logic ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem(DARK_MODE_KEY, isDarkMode);
+            // Re-render charts to apply new theme colors
+            if (currentView === 'dashboard-section') {
+                renderDashboard();
+            }
+        }
+
+        function loadDarkModePreference() {
+            const isDarkMode = localStorage.getItem(DARK_MODE_KEY) === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.checked = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                darkModeToggle.checked = false;
+            }
+        }
+
+        darkModeToggle.addEventListener('change', toggleDarkMode);
+
 
         // --- Offline Mode Simulation ---
         function checkOnlineStatus() {
@@ -1727,9 +2094,12 @@
         const activeSprintsEl = document.getElementById('activeSprints');
         const taskCompletionChartCanvas = document.getElementById('taskCompletionChart');
         const memberProductivityChartCanvas = document.getElementById('memberProductivityChart');
+        const generateWeeklyReportBtn = document.getElementById('generateWeeklyReportBtn');
 
         let taskCompletionChartInstance = null;
         let memberProductivityChartInstance = null;
+
+        generateWeeklyReportBtn.addEventListener('click', generateWeeklyReportPDF);
 
         function renderDashboard() {
             totalMembersEl.textContent = appData.members.length;
@@ -1781,8 +2151,8 @@
                         tension: 0.3,
                         fill: true,
                         pointBackgroundColor: varColor('--primary-color'),
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
+                        pointBorderColor: varColor('--surface-color'),
+                        pointHoverBackgroundColor: varColor('--surface-color'),
                         pointHoverBorderColor: varColor('--primary-color'),
                     }]
                 },
@@ -1793,7 +2163,19 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                precision: 0
+                                precision: 0,
+                                color: varColor('--light-text-color')
+                            },
+                            grid: {
+                                color: varColor('--border-color')
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: varColor('--light-text-color')
+                            },
+                            grid: {
+                                color: varColor('--border-color')
                             }
                         }
                     },
@@ -1847,7 +2229,19 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                precision: 0
+                                precision: 0,
+                                color: varColor('--light-text-color')
+                            },
+                            grid: {
+                                color: varColor('--border-color')
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: varColor('--light-text-color')
+                            },
+                            grid: {
+                                color: varColor('--border-color')
                             }
                         }
                     },
@@ -1873,6 +2267,103 @@
         function varColor(name) {
             return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         }
+
+        // --- Weekly Reports Generator (PDF) ---
+        async function generateWeeklyReportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const startOfWeek = new Date();
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday
+            startOfWeek.setHours(0, 0, 0, 0);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 6); // Saturday
+            endOfWeek.setHours(23, 59, 59, 999);
+
+            doc.setFont('Inter', 'normal'); // Set font for the PDF
+
+            let y = 20;
+            const margin = 15;
+            const lineHeight = 7;
+
+            doc.setFontSize(20);
+            doc.text("Weekly Team Report", margin, y);
+            y += 10;
+            doc.setFontSize(12);
+            doc.text(`Week: ${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`, margin, y);
+            y += 15;
+
+            // --- Section: Tasks Completed This Week ---
+            doc.setFontSize(16);
+            doc.text("Tasks Completed This Week", margin, y);
+            y += 8;
+            doc.setFontSize(10);
+            const completedTasks = appData.tasks.filter(task =>
+                task.status === 'Done' && new Date(task.endDate) >= startOfWeek && new Date(task.endDate) <= endOfWeek
+            );
+            if (completedTasks.length > 0) {
+                completedTasks.forEach(task => {
+                    const assignedMember = appData.members.find(m => m.id === task.assignedTo)?.name || 'Unassigned';
+                    doc.text(`- ${task.title} (Assigned to: ${assignedMember})`, margin + 5, y);
+                    y += lineHeight;
+                });
+            } else {
+                doc.text("No tasks completed this week.", margin + 5, y);
+                y += lineHeight;
+            }
+            y += 10;
+
+            // --- Section: New Bugs Reported This Week ---
+            doc.setFontSize(16);
+            doc.text("New Bugs Reported This Week", margin, y);
+            y += 8;
+            doc.setFontSize(10);
+            const newBugs = appData.bugs.filter(bug =>
+                new Date(bug.reportedDate) >= startOfWeek && new Date(bug.reportedDate) <= endOfWeek
+            );
+            if (newBugs.length > 0) {
+                newBugs.forEach(bug => {
+                    const reporter = appData.members.find(m => m.id === bug.reportedBy)?.name || 'Unknown';
+                    doc.text(`- ${bug.title} (Reported by: ${reporter}, Priority: ${bug.priority})`, margin + 5, y);
+                    y += lineHeight;
+                });
+            } else {
+                doc.text("No new bugs reported this week.", margin + 5, y);
+                y += lineHeight;
+            }
+            y += 10;
+
+            // --- Section: Daily Standup Summaries (Last 7 Days) ---
+            doc.setFontSize(16);
+            doc.text("Daily Standup Summaries (Last 7 Days)", margin, y);
+            y += 8;
+            doc.setFontSize(10);
+            const recentStandups = appData.standups.filter(s => new Date(s.date) >= startOfWeek).sort((a,b) => new Date(a.date) - new Date(b.date));
+            if (recentStandups.length > 0) {
+                recentStandups.forEach(standup => {
+                    doc.text(`- ${standup.memberName} (${new Date(standup.date).toLocaleDateString()})`, margin + 5, y);
+                    y += lineHeight;
+                    doc.text(`  Yesterday: ${standup.yesterday}`, margin + 10, y);
+                    y += lineHeight;
+                    doc.text(`  Today: ${standup.today}`, margin + 10, y);
+                    y += lineHeight;
+                    if (standup.blockers) {
+                        doc.text(`  Blockers: ${standup.blockers}`, margin + 10, y);
+                        y += lineHeight;
+                    }
+                    y += 5; // Extra space between standups
+                });
+            } else {
+                doc.text("No standup summaries for this period.", margin + 5, y);
+                y += lineHeight;
+            }
+            y += 10;
+
+
+            doc.save("Weekly_Team_Report.pdf");
+            showMessageBox('Report Generated', 'Weekly Team Report PDF has been downloaded!', [{ text: 'OK', className: 'btn-primary' }]);
+        }
+
 
         // --- Team Member Management Logic ---
         const teamMembersGrid = document.getElementById('teamMembersGrid');
@@ -1977,6 +2468,9 @@
             populateTaskAssignedToDropdown(); // Update task dropdown
             populateStandupMemberDropdown(); // Update standup dropdown
             populateChatUserSelector(); // Update chat user selector
+            populateBugAssignedToDropdown(); // Update bug dropdowns
+            populateBugReportedByDropdown(); // Update bug dropdowns
+            renderTechStackMatrix(); // Update tech stack matrix
         }
 
         /**
@@ -1986,7 +2480,7 @@
         function deleteMember(memberId) {
             showMessageBox(
                 'Confirm Deletion',
-                'Are you sure you want to delete this member? All their assigned tasks will also be unassigned.',
+                'Are you sure you want to delete this member? All their assigned tasks and bugs will also be unassigned.',
                 [
                     { text: 'Cancel', className: 'btn-outline', callback: () => {} },
                     { text: 'Delete', className: 'btn-danger', callback: () => {
@@ -1998,6 +2492,17 @@
                             }
                             return task;
                         });
+                        // Unassign bugs from this member
+                        appData.bugs = appData.bugs.map(bug => {
+                            if (bug.assignedTo === memberId) {
+                                bug.assignedTo = null;
+                            }
+                            if (bug.reportedBy === memberId) {
+                                bug.reportedBy = null; // Or set to a generic 'deleted user' ID
+                            }
+                            return bug;
+                        });
+
                         saveData(appData);
                         renderTeamMembers();
                         renderKanbanBoard(); // Re-render tasks to reflect unassignment
@@ -2005,6 +2510,10 @@
                         populateTaskAssignedToDropdown();
                         populateStandupMemberDropdown();
                         populateChatUserSelector();
+                        renderBugs(); // Re-render bugs
+                        populateBugAssignedToDropdown();
+                        populateBugReportedByDropdown();
+                        renderTechStackMatrix();
                     }}
                 ]
             );
@@ -2880,15 +3389,212 @@
             );
         }
 
+        // --- Bug Tracker Logic ---
+        const bugListEl = document.getElementById('bugList');
+        const bugModal = document.getElementById('bugModal');
+        const bugModalTitle = document.getElementById('bugModalTitle');
+        const bugForm = document.getElementById('bugForm');
+        const addBugBtn = document.getElementById('addBugBtn');
+        const closeBugModalBtn = document.getElementById('closeBugModal');
+        const cancelBugFormBtn = document.getElementById('cancelBugForm');
+        const bugReportedByDropdown = document.getElementById('bugReportedBy');
+        const bugAssignedToDropdown = document.getElementById('bugAssignedTo');
+
+        addBugBtn.addEventListener('click', () => openBugModal());
+        closeBugModalBtn.addEventListener('click', () => bugModal.classList.add('hidden'));
+        cancelBugFormBtn.addEventListener('click', () => bugModal.classList.add('hidden'));
+        bugForm.addEventListener('submit', handleBugFormSubmit);
+
+        /**
+         * Populates the "Reported By" dropdown in the bug form.
+         */
+        function populateBugReportedByDropdown() {
+            bugReportedByDropdown.innerHTML = '<option value="">Select Reporter</option>';
+            appData.members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.name;
+                bugReportedByDropdown.appendChild(option);
+            });
+        }
+
+        /**
+         * Populates the "Assigned To" dropdown in the bug form.
+         */
+        function populateBugAssignedToDropdown() {
+            bugAssignedToDropdown.innerHTML = '<option value="">Unassigned</option>';
+            appData.members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.name;
+                bugAssignedToDropdown.appendChild(option);
+            });
+        }
+
+        /**
+         * Renders the list of bugs.
+         */
+        function renderBugs() {
+            bugListEl.innerHTML = '';
+            if (appData.bugs.length === 0) {
+                bugListEl.innerHTML = '<p class="text-center text-gray-500">No bugs reported yet. Click "Report Bug" to add one!</p>';
+                return;
+            }
+            appData.bugs.forEach(bug => {
+                const reporter = appData.members.find(m => m.id === bug.reportedBy)?.name || 'Unknown';
+                const assignee = appData.members.find(m => m.id === bug.assignedTo)?.name || 'Unassigned';
+
+                const bugItem = document.createElement('div');
+                bugItem.classList.add('bug-item');
+                bugItem.innerHTML = `
+                    <h4>${bug.title}</h4>
+                    <p>${bug.description || 'No description provided.'}</p>
+                    <div class="meta">
+                        <span>Reported By: <strong>${reporter}</strong></span>
+                        <span>Assigned To: <strong>${assignee}</strong></span>
+                        <span>Priority: <span class="priority-tag priority-${bug.priority.toLowerCase()}">${bug.priority}</span></span>
+                        <span>Status: <span class="status-tag bug-status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></span>
+                        <span>Reported Date: ${new Date(bug.reportedDate).toLocaleDateString()}</span>
+                        ${bug.fixDate ? `<span>Fixed Date: ${new Date(bug.fixDate).toLocaleDateString()}</span>` : ''}
+                    </div>
+                    <div class="actions admin-only dev-des-only qa-only">
+                        <button class="btn btn-outline btn-sm" onclick="openBugModal('${bug.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteBug('${bug.id}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                `;
+                bugListEl.appendChild(bugItem);
+            });
+            applyRoleVisibility(bugListEl);
+        }
+
+        /**
+         * Opens the bug modal for adding or editing.
+         * @param {string} [bugId] - The ID of the bug to edit (optional).
+         */
+        function openBugModal(bugId) {
+            bugForm.reset();
+            document.getElementById('bugId').value = '';
+            bugModalTitle.textContent = 'Report New Bug';
+            populateBugReportedByDropdown();
+            populateBugAssignedToDropdown();
+
+            if (bugId) {
+                const bug = appData.bugs.find(b => b.id === bugId);
+                if (bug) {
+                    bugModalTitle.textContent = 'Edit Bug';
+                    document.getElementById('bugId').value = bug.id;
+                    document.getElementById('bugTitle').value = bug.title;
+                    document.getElementById('bugDescription').value = bug.description || '';
+                    document.getElementById('bugReportedBy').value = bug.reportedBy || '';
+                    document.getElementById('bugAssignedTo').value = bug.assignedTo || '';
+                    document.getElementById('bugPriority').value = bug.priority;
+                    document.getElementById('bugStatus').value = bug.status;
+                }
+            }
+            bugModal.classList.remove('hidden');
+        }
+
+        /**
+         * Handles the submission of the bug form.
+         * @param {Event} event - The form submit event.
+         */
+        function handleBugFormSubmit(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('bugId').value || generateUniqueId();
+            const title = document.getElementById('bugTitle').value;
+            const description = document.getElementById('bugDescription').value;
+            const reportedBy = document.getElementById('bugReportedBy').value;
+            const assignedTo = document.getElementById('bugAssignedTo').value || null;
+            const priority = document.getElementById('bugPriority').value;
+            const status = document.getElementById('bugStatus').value;
+
+            const now = new Date().toISOString().split('T')[0];
+            let reportedDate = now;
+            let fixDate = null;
+
+            const existingBug = appData.bugs.find(b => b.id === id);
+            if (existingBug) {
+                reportedDate = existingBug.reportedDate; // Keep original reported date
+                if (status === 'Fixed' || status === 'Closed') {
+                    fixDate = now;
+                } else {
+                    fixDate = existingBug.fixDate; // Keep existing fix date if not fixed/closed
+                }
+            } else {
+                // New bug, set reported date
+                reportedDate = now;
+            }
+
+
+            const newBug = { id, title, description, reportedBy, assignedTo, priority, status, reportedDate, fixDate };
+
+            if (existingBug) {
+                const existingIndex = appData.bugs.findIndex(b => b.id === id);
+                appData.bugs[existingIndex] = newBug;
+            } else {
+                appData.bugs.push(newBug);
+            }
+
+            saveData(appData);
+            bugModal.classList.add('hidden');
+            renderBugs();
+        }
+
+        /**
+         * Deletes a bug.
+         * @param {string} bugId - The ID of the bug to delete.
+         */
+        function deleteBug(bugId) {
+            showMessageBox(
+                'Confirm Deletion',
+                'Are you sure you want to delete this bug report?',
+                [
+                    { text: 'Cancel', className: 'btn-outline', callback: () => {} },
+                    { text: 'Delete', className: 'btn-danger', callback: () => {
+                        appData.bugs = appData.bugs.filter(b => b.id !== bugId);
+                        saveData(appData);
+                        renderBugs();
+                    }}
+                ]
+            );
+        }
+
+        // --- Tech Stack Matrix Logic ---
+        const techStackTableBody = document.getElementById('techStackTableBody');
+
+        /**
+         * Renders the tech stack matrix.
+         */
+        function renderTechStackMatrix() {
+            techStackTableBody.innerHTML = '';
+            if (appData.members.length === 0) {
+                techStackTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500">No team members to display tech stack.</td></tr>';
+                return;
+            }
+
+            appData.members.forEach(member => {
+                const row = document.createElement('tr');
+                const skillsHtml = member.skillset.map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.role}</td>
+                    <td>${skillsHtml || '<span class="text-gray-500">No skills listed</span>'}</td>
+                `;
+                techStackTableBody.appendChild(row);
+            });
+        }
+
+
         // Initial Data Population (if localStorage is empty)
         function initializeAppData() {
             if (appData.members.length === 0 && appData.tasks.length === 0) {
                 appData.members = [
-                    { id: 'm1', name: 'Alice Johnson', role: 'Admin', avatar: 'https://placehold.co/80x80/FFDDC1/FF6700?text=AJ', email: 'alice@example.com', skillset: ['Leadership', 'Strategy', 'Project Mgmt'], group: 'Admin', status: 'Active' },
-                    { id: 'm2', name: 'Bob Smith', role: 'Developer', avatar: 'https://placehold.co/80x80/CCEEFF/007BFF?text=BS', email: 'bob@example.com', skillset: ['JavaScript', 'React', 'Node.js'], group: 'Frontend', status: 'Active' },
-                    { id: 'm3', name: 'Charlie Brown', role: 'Designer', avatar: 'https://placehold.co/80x80/D1C4E9/673AB7?text=CB', email: 'charlie@example.com', skillset: ['UI/UX', 'Figma', 'Prototyping'], group: 'Design', status: 'Active' },
-                    { id: 'm4', name: 'Diana Prince', role: 'Developer', avatar: 'https://placehold.co/80x80/C8E6C9/4CAF50?text=DP', email: 'diana@example.com', skillset: ['Python', 'Django', 'SQL'], group: 'Backend', status: 'On Leave' },
-                    { id: 'm5', name: 'Eve Adams', role: 'QA', avatar: 'https://placehold.co/80x80/FFF9C4/FFC107?text=EA', email: 'eve@example.com', skillset: ['Manual Testing', 'Automation', 'Jira'], group: 'QA', status: 'Active' }
+                    { id: 'm1', name: 'Alice Johnson', role: 'Admin', avatar: 'https://placehold.co/80x80/FFDDC1/FF6700?text=AJ', email: 'alice@example.com', skillset: ['Leadership', 'Strategy', 'Project Mgmt', 'Budgeting'], group: 'Admin', status: 'Active' },
+                    { id: 'm2', name: 'Bob Smith', role: 'Developer', avatar: 'https://placehold.co/80x80/CCEEFF/007BFF?text=BS', email: 'bob@example.com', skillset: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Git'], group: 'Frontend', status: 'Active' },
+                    { id: 'm3', name: 'Charlie Brown', role: 'Designer', avatar: 'https://placehold.co/80x80/D1C4E9/673AB7?text=CB', email: 'charlie@example.com', skillset: ['UI/UX', 'Figma', 'Prototyping', 'Adobe XD', 'User Research'], group: 'Design', status: 'Active' },
+                    { id: 'm4', name: 'Diana Prince', role: 'Developer', avatar: 'https://placehold.co/80x80/C8E6C9/4CAF50?text=DP', email: 'diana@example.com', skillset: ['Python', 'Django', 'SQL', 'AWS', 'Docker'], group: 'Backend', status: 'On Leave' },
+                    { id: 'm5', name: 'Eve Adams', role: 'QA', avatar: 'https://placehold.co/80x80/FFF9C4/FFC107?text=EA', email: 'eve@example.com', skillset: ['Manual Testing', 'Automation', 'Jira', 'Selenium', 'TestRail'], group: 'QA', status: 'Active' }
                 ];
 
                 appData.tasks = [
@@ -2922,6 +3628,14 @@
                     { id: 'g1', title: 'Launch New Homepage', description: 'Complete development and deployment of the redesigned homepage.', targetDate: '2025-08-31', linkedTasks: ['t1', 't2', 't5'] },
                     { id: 'g2', title: 'Improve System Performance by 20%', description: 'Optimize database queries and backend services.', targetDate: '2025-09-30', linkedTasks: ['t3'] }
                 ];
+
+                // New: Bug Tracker Sample Data
+                appData.bugs = [
+                    { id: 'b1', title: 'Login button unresponsive on mobile', description: 'After successful login, the login button remains clickable and does not redirect.', reportedBy: 'm5', assignedTo: 'm2', status: 'Open', priority: 'High', reportedDate: '2025-07-09', fixDate: null },
+                    { id: 'b2', title: 'Calendar view shows incorrect dates for sprints', description: 'Sprint week dates are off by one day in the calendar view.', reportedBy: 'm1', assignedTo: 'm2', status: 'In Progress', priority: 'Medium', reportedDate: '2025-07-11', fixDate: null },
+                    { id: 'b3', title: 'PDF report generation fails for large data sets', description: 'When generating reports with many tasks, the PDF download fails or is corrupted.', reportedBy: 'm1', assignedTo: 'm4', status: 'Fixed', priority: 'High', reportedDate: '2025-07-01', fixDate: '2025-07-05' }
+                ];
+
 
                 appData.currentChatUserId = appData.members[0].id; // Set default chat user
                 saveData(appData);
